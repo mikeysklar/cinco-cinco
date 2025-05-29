@@ -7,15 +7,15 @@ import adafruit_ble
 from adafruit_ble.advertising.standard import ProvideServicesAdvertisement
 from adafruit_ble.services.standard.hid import HIDService
 from adafruit_hid.keyboard import Keyboard
+from adafruit_hid.mouse import Mouse
 from adafruit_hid.keycode import Keycode
 
-# ─── Power on the MCP VCC ─────────────────────────────────────────────────────
+# ─── Hardware setup ──────────────────────────────────────────────────────────
 vcc = digitalio.DigitalInOut(board.VCC_OFF)
 vcc.direction = digitalio.Direction.OUTPUT
 vcc.value = True
 time.sleep(0.5)
 
-# ─── I2C + MCP23008 setup ─────────────────────────────────────────────────────
 i2c = busio.I2C(scl=board.SCL, sda=board.SDA, frequency=400000)
 mcp = MCP23008(i2c)
 pins = [mcp.get_pin(i) for i in range(5)]
@@ -24,118 +24,189 @@ for p in pins:
     p.pull = digitalio.Pull.UP
 
 # ─── BLE HID setup ─────────────────────────────────────────────────────────────
-ble       = adafruit_ble.BLERadio()
-hid_svc   = HIDService()
-advert    = ProvideServicesAdvertisement(hid_svc)
-keyboard  = Keyboard(hid_svc.devices)
+ble = adafruit_ble.BLERadio()
+hid_svc = HIDService()
+advert = ProvideServicesAdvertisement(hid_svc)
+keyboard = Keyboard(hid_svc.devices)
+mouse = Mouse(hid_svc.devices)
 ble.start_advertising(advert)
 while not ble.connected:
     pass
 ble.stop_advertising()
 
-# ─── Timing & state constants ─────────────────────────────────────────────────
-STABLE_MS        = 0.03    # chord settle (30ms)
-DEBOUNCE_UP      = 0.05    # post-send pause
-TAP_WINDOW       = 0.5     # thumb tap window
-MIN_TAP_INTERVAL = 0.1     # tap debounce
+# ─── Timing constants ─────────────────────────────────────────────────────────
+STABLE_MS_ALPHA = 0.03   # 30 ms for layer-1 (alpha)
+STABLE_MS_OTHER = 0.02   # 20 ms for layers 2/3
+DEBOUNCE_UP      = 0.05  # pause after send
+TAP_WINDOW       = 0.5   # thumb-tap window
+MIN_TAP_INT      = 0.1   # thumb debounce
 
 # ─── State variables ──────────────────────────────────────────────────────────
-layer            = 0       # 0..2 locked modes
+layer            = 1     # layers 1..5
 thumb_taps       = 0
+tap_in_prog      = False
 last_tap_time    = 0.0
 last_combo       = ()
 pending_combo    = None
-sent_on_release  = False
-last_change_time = time.monotonic()
-last_thumb_state = False
+sent_release     = False
+skip_scag        = False
+scag_skip_combo  = None
+modifier_armed   = False
+held_modifier    = None
+last_time        = time.monotonic()
 
-# ─── chord→Keycode maps for layers 0–2 ────────────────────────────────────────
+# ─── SCAG modifier chords for layer-4 ────────────────────────────────────────
+modifier_chords = {
+    (3,): Keycode.LEFT_SHIFT,
+    (2,): Keycode.LEFT_CONTROL,
+    (1,): Keycode.LEFT_ALT,
+    (0,): Keycode.LEFT_GUI
+}
+
+# ─── Mouse button chords for layer-5 ─────────────────────────────────────────
+from adafruit_hid.mouse import Mouse
+mouse_button_chords = {
+    (0,1): Mouse.LEFT_BUTTON,
+    (2,3): Mouse.RIGHT_BUTTON,
+    (1,2): Mouse.MIDDLE_BUTTON,
+    (0,4): Mouse.BACK_BUTTON,
+    (3,4): Mouse.FORWARD_BUTTON
+}
+
+# ─── Chord maps for layers 1–3; index 0 unused ────────────────────────────────
 layer_maps = [
-    { # Layer 0: alpha + space/backspace
-        (0,): Keycode.E, (1,): Keycode.I, (2,): Keycode.A, (3,): Keycode.S,
-        (0,1): Keycode.R,(0,2):Keycode.O,(0,3):Keycode.C,(1,2):Keycode.N,
-        (1,3):Keycode.L,(2,3):Keycode.T,(0,1,2):Keycode.D,(1,2,3):Keycode.P,
-        (0,1,2,3):Keycode.U,(0,2,3):Keycode.SPACE,(0,1,3):Keycode.BACKSPACE,
-        (0,4):Keycode.M,(1,4):Keycode.G,(2,4):Keycode.H,(3,4):Keycode.B,
-        (0,1,4):Keycode.Y,(0,2,4):Keycode.W,(0,3,4):Keycode.X,
-        (1,2,4):Keycode.F,(1,3,4):Keycode.K,(2,3,4):Keycode.V,
-        (0,1,2,4):Keycode.J,(1,2,3,4):Keycode.Z,(0,1,2,3,4):Keycode.Q
+    {},
+    { # layer-1: alpha
+      (0,):Keycode.E,(1,):Keycode.I,(2,):Keycode.A,(3,):Keycode.S,
+      (0,1):Keycode.R,(0,2):Keycode.O,(0,3):Keycode.C,(1,2):Keycode.N,
+      (1,3):Keycode.L,(2,3):Keycode.T,(0,1,2):Keycode.D,(1,2,3):Keycode.P,
+      (0,1,2,3):Keycode.U,(0,2,3):Keycode.SPACE,(0,1,3):Keycode.BACKSPACE,
+      (0,4):Keycode.M,(1,4):Keycode.G,(2,4):Keycode.H,(3,4):Keycode.B,
+      (0,1,4):Keycode.Y,(0,2,4):Keycode.W,(0,3,4):Keycode.X,
+      (1,2,4):Keycode.F,(1,3,4):Keycode.K,(2,3,4):Keycode.V,
+      (0,1,2,4):Keycode.J,(1,2,3,4):Keycode.Z,(0,1,2,3,4):Keycode.Q
     },
-    { # Layer 1: numbers & arrows
-        (0,):Keycode.ONE,(1,):Keycode.TWO,(2,):Keycode.THREE,(3,):Keycode.FOUR,
-        (0,1):Keycode.FIVE,(1,2):Keycode.SIX,(2,3):Keycode.SEVEN,(0,2):Keycode.EIGHT,
-        (1,3):Keycode.NINE,(0,1,2):Keycode.ZERO,
-        (0,3):Keycode.UP_ARROW,(1,2,3):Keycode.DOWN_ARROW,
-        (0,1,3):Keycode.RIGHT_ARROW,(0,2,3):Keycode.LEFT_ARROW,(0,1,2,3):Keycode.ESCAPE
+    { # layer-2: numbers & arrows
+      (0,):Keycode.ONE,(1,):Keycode.TWO,(2,):Keycode.THREE,(3,):Keycode.FOUR,
+      (0,1):Keycode.FIVE,(1,2):Keycode.SIX,(2,3):Keycode.SEVEN,(0,2):Keycode.EIGHT,
+      (1,3):Keycode.NINE,(0,1,2):Keycode.ZERO,
+      (0,3):Keycode.UP_ARROW,(1,2,3):Keycode.DOWN_ARROW,
+      (0,1,3):Keycode.RIGHT_ARROW,(0,2,3):Keycode.LEFT_ARROW,
+      (0,1,2,3):Keycode.ESCAPE
     },
-    { # Layer 2: whitespace & delimiters
-        (1,):Keycode.TAB,(2,):Keycode.PERIOD,(3,):Keycode.MINUS,
-        (2,3):Keycode.FORWARD_SLASH,(0,1):Keycode.ENTER,(0,2):Keycode.COMMA,
-        (1,3):Keycode.LEFT_BRACKET,(0,3):Keycode.RIGHT_BRACKET,
-        (1,2,3):Keycode.BACKSLASH,(1,2):Keycode.BACKSPACE,
-        (0,1,3):Keycode.QUOTE,(0,2,3):Keycode.SEMICOLON,(0,1,2,3):Keycode.GRAVE_ACCENT
+    { # layer-3: whitespace & delimiters
+      (1,):Keycode.TAB,(2,):Keycode.PERIOD,(3,):Keycode.MINUS,
+      (2,3):Keycode.FORWARD_SLASH,(0,1):Keycode.ENTER,(0,2):Keycode.COMMA,
+      (1,3):Keycode.LEFT_BRACKET,(0,3):Keycode.RIGHT_BRACKET,
+      (1,2,3):Keycode.BACKSLASH,(1,2):Keycode.BACKSPACE,
+      (0,1,3):Keycode.QUOTE,(0,2,3):Keycode.SEMICOLON,(0,1,2,3):Keycode.GRAVE_ACCENT
     }
 ]
 
-# ─── Chord detection & layer-lock logic ────────────────────────────────────────
+# ─── Core chord logic with layers 1–5 ──────────────────────────────────────────
 def check_chords():
-    global layer, thumb_taps, last_tap_time, last_thumb_state
-    global last_combo, pending_combo, sent_on_release, last_change_time
+    global layer, thumb_taps, tap_in_prog, last_tap_time
+    global last_combo, pending_combo, sent_release, skip_scag, scag_skip_combo
+    global modifier_armed, held_modifier, last_time
 
     now = time.monotonic()
     pressed = tuple(not p.value for p in pins)
-    finger_down = any(pressed[:4])
-    thumb_down  = pressed[4]
+    finger = any(pressed[:4])
+    thumb = pressed[4]
 
-        # 1) thumb-alone detect for locking
-    if thumb_down and not finger_down and not last_thumb_state:
-        # rising edge of sole thumb
-        if (now - last_tap_time) < TAP_WINDOW:
+    # 1) thumb taps → lock layers 1–5
+    if thumb and not finger and not tap_in_prog:
+        tap_in_prog = True
+        if now - last_tap_time < TAP_WINDOW:
             thumb_taps += 1
         else:
             thumb_taps = 1
         last_tap_time = now
-        # lock layer: 1 tap->L0,2->L1,3->L2
-        layer = min(thumb_taps-1, 2)
-        print(f"→ locked to layer {layer}")
-        # reset chord state
+        layer = min(thumb_taps, 5)
+        print(f"→ locked to layer-{layer}")
         last_combo = ()
         pending_combo = None
-        sent_on_release = False
-        last_thumb_state = True
+        sent_release = False
+        skip_scag = False
+        modifier_armed = False
+        held_modifier = None
+        scag_skip_combo = None
         return
+    if not thumb:
+        tap_in_prog = False
 
-    if not thumb_down:
-        last_thumb_state = False
-
-    # 2) chord build & stabilize
+    # 2) chord detect & stabilize
     combo = tuple(i for i,b in enumerate(pressed) if b)
     if combo != last_combo:
-        last_change_time = now
+        last_time = now
         if last_combo == () and combo != ():
             pending_combo = None
-            sent_on_release = False
-    if combo and (now - last_change_time) >= STABLE_MS and combo != pending_combo:
+            sent_release = False
+    ms = STABLE_MS_ALPHA if layer == 1 else STABLE_MS_OTHER
+    if combo and (now - last_time) >= ms and combo != pending_combo:
         pending_combo = combo
 
-    # 3) send on first release
-    if len(combo) < len(last_combo) and last_combo and not sent_on_release:
-        # ignore pure thumb combos
-        use = pending_combo or last_combo
-        if use != (4,):
-            kc = layer_maps[layer].get(use)
-            if kc:
-                keyboard.press(kc)
+    # 3) layer-5 mouse handling
+    if layer == 5:
+        # button clicks
+        if combo in mouse_button_chords:
+            mouse.click(mouse_button_chords[combo])
+            sent_release = True
+            time.sleep(DEBOUNCE_UP)
+            return
+        # movement on single fingers
+        dx = dy = 0
+        if combo == (0,): dy = -10
+        elif combo == (1,): dx =  10
+        elif combo == (2,): dx = -10
+        elif combo == (3,): dy =  10
+        if dx or dy:
+            mouse.move(dx, dy)
+            sent_release = True
+            time.sleep(DEBOUNCE_UP)
+            return
+
+    # 4) SCAG logic for layer-4
+    if layer == 4 and not modifier_armed and pending_combo in modifier_chords:
+        held_modifier = modifier_chords[pending_combo]
+        modifier_armed = True
+        scag_skip_combo = pending_combo
+        skip_scag = True
+        print(f"→ modifier armed: {held_modifier}")
+        pending_combo = None
+        last_combo = ()
+        return
+
+    # 5) first-release send for layers 1–4
+    if len(combo) < len(last_combo) and last_combo and not sent_release:
+        if skip_scag and last_combo == scag_skip_combo:
+            skip_scag = False
+        else:
+            if layer == 4 and modifier_armed and last_combo in layer_maps[1]:
+                key = layer_maps[1][last_combo]
+                keyboard.press(held_modifier, key)
                 keyboard.release_all()
-            else:
-                print(f"Unknown L{layer}: {use}")
-        sent_on_release = True
+                print(f"→ sent {held_modifier}+{key}")
+                layer = 1
+                thumb_taps = 1
+                modifier_armed = False
+                skip_scag = False
+            elif layer in (1, 2, 3):
+                use = pending_combo or last_combo
+                if use != (4,):
+                    kc = layer_maps[layer].get(use)
+                    if kc:
+                        keyboard.press(kc)
+                        keyboard.release_all()
+                    else:
+                        print(f"Unknown L{layer}: {use}")
+        sent_release = True
         time.sleep(DEBOUNCE_UP)
 
-    # 4) clear state on full release
+    # 6) clear on full release
     if combo == () and last_combo != ():
         pending_combo = None
-        sent_on_release = False
+        sent_release = False
 
     last_combo = combo
 
