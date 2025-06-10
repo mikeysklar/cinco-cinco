@@ -95,7 +95,7 @@ layer_maps = [
       (0,1,2,3):Keycode.ESCAPE
     },
     { # layer-3: whitespace & delimiters
-      (1,):Keycode.TAB,(2,):Keycode.PERIOD,(3,):Keycode.MINUS,
+      (0,): Keycode.ESCAPE,(1,):Keycode.TAB,(2,):Keycode.PERIOD,(3,):Keycode.MINUS,
       (2,3):Keycode.FORWARD_SLASH,(0,1):Keycode.ENTER,(0,2):Keycode.COMMA,
       (1,3):Keycode.LEFT_BRACKET,(0,3):Keycode.RIGHT_BRACKET,
       (1,2,3):Keycode.BACKSLASH,(1,2):Keycode.BACKSPACE,
