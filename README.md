@@ -204,16 +204,19 @@ Each layer uses unique key combinations (chords) from the 5 keys (positions 0–
 
 ## Layer 5: Mouse Control (Movement, Scroll, Buttons)
 
-| Action         | Pky | Rng | Mid | Idx | Thm | Chord       |
-|----------------|:---:|:---:|:---:|:---:|:---:|-------------|
-| MOVE LEFT      |     |     |     |  x  |     | (0,)        |
-| MOVE RIGHT     |     |     |  x  |     |     | (1,)        |
-| MOVE UP        |     |  x  |     |     |     | (2,)        |
-| MOVE DOWN      |  x  |     |     |     |     | (3,)        |
-| SCROLL UP      |     |  x  |  x  |     |     | (1,2)       |
-| SCROLL DOWN    |  x  |  x  |     |     |     | (2,3)       |
-| LEFT CLICK     |     |     |  x  |  x  |     | (0,1)       |
-| RIGHT CLICK    |  x  |     |  x  |     |     | (1,3)       |
-| MIDDLE CLICK   |     |  x  |     |  x  |     | (0,2)       |
-| HOLD LEFT      |  x  |  x  |  x  |     |     | (1,2,3)     |
-| RELEASE CLICK  |     |  x  |  x  |  x  |     | (0,1,2)     |
+| Action           | Pky | Rng | Mid | Idx | Thm | Chord       |
+|------------------|:---:|:---:|:---:|:---:|:---:|-------------|
+| **MOVE LEFT**      |     |     |     |  x  |     | `(0,)`        |
+| **MOVE RIGHT**     |     |     |  x  |     |     | `(1,)`        |
+| **MOVE UP**        |     |  x  |     |     |     | `(2,)`        |
+| **MOVE DOWN**      |  x  |     |     |     |     | `(3,)`        |
+| **SCROLL UP**      |  x  |     |     |  x  |     | `(0,3)`       |
+| **SCROLL DOWN**    |  x  |     |     |     |  x  | `(3,4)`       |
+| **LEFT CLICK**     |     |     |  x  |  x  |     | `(0,1)`       |
+| **RIGHT CLICK**    |  x  |     |     |  x  |     | `(2,3)`       |
+| **MIDDLE CLICK**   |     |  x  |  x  |     |     | `(1,2)`       |
+| **BACK BUTTON**    |     |     |     |  x  |  x  | `(0,4)`       |
+| **FORWARD BUTTON** |  x  |     |     |     |  x  | `(3,4)`       |
+| **HOLD LEFT**      |     |  x  |  x  |     |  x  | `(0,1,4)`     |
+| **RELEASE LEFT**   |     |     |  x  |  x  |  x  | `(1,2,4)`     |
+| **ACCELERATE**     |     |  x  |     |     |  x  | `(2,4)`       |
