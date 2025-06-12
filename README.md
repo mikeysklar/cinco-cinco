@@ -1,7 +1,7 @@
 # Cinco-Cinco
 *A 5-Key Chording Keyboard with Layered Input and BLE Support*
 
-Cinco-Cinco is a compact, low-profile chording keyboard that uses just **five keys** to emulate a full keyboard. By combining keypresses into chords and utilizing **five software layers**, Cinco-Cinco enables efficient one-handed typing. With optional BLE support and a modular design, it's ideal for mobile computing, minimal setups, and assistive technology use.
+Cinco-Cinco is a compact, low-profile chording keyboard that uses just **five keys** to emulate a full keyboard. By combining keypresses into chords and utilizing **five software layers**, Cinco-Cinco enables efficient one-handed typing.  I had been building 7-key chording keyboards, but that reuires the hand to lose its home position and travel. Five keys and layers not only allows for all keys, but also all total control. It is a lot of fun to use.
 
 ## Table of Contents
 - [Features](#features)
