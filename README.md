@@ -117,11 +117,7 @@ Each layer uses unique key combinations (chords) from the 5 keys (positions 0–
 | Middle | 1         |
 | Fore   | 0         |
 
-### Layer 1: Letters
-
-## Layer 1: Letters (Compact Format)
-
-## Layer 1: Letters (Reordered Columns)
+## Layer 1: Letters 
 
 | Key         | Pky | Rng | Mid | Idx | Thm | Chord         |
 |-------------|:---:|:---:|:---:|:---:|:---:|---------------|
@@ -154,7 +150,7 @@ Each layer uses unique key combinations (chords) from the 5 keys (positions 0–
 | BACKSPACE   |  x  |     |  x  |  x  |     | (0,1,3)       |
 | SPACE       |  x  |  x  |     |  x  |     | (0,2,3)       |
     
-## Layer 2: Numbers and Arrows (Compact Format)
+## Layer 2: Numbers and Arrows 
 
 | Key         | Pky | Rng | Mid | Idx | Thm | Chord         |
 |-------------|:---:|:---:|:---:|:---:|:---:|---------------|
@@ -174,7 +170,7 @@ Each layer uses unique key combinations (chords) from the 5 keys (positions 0–
 | ← (Left)    |  x  |  x  |     |  x  |     | (0,2,3)       |
 | ESCAPE      |  x  |  x  |  x  |  x  |     | (0,1,2,3)     |
 
-## Layer 3: Whitespace & Delimiters (Reordered Columns)
+## Layer 3: Whitespace & Delimiters 
 
 | Key            | Pky | Rng | Mid | Idx | Thm | Chord         |
 |----------------|:---:|:---:|:---:|:---:|:---:|---------------|
