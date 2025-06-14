@@ -67,34 +67,6 @@ modifier_chords = {
     (0,): Keycode.LEFT_GUI
 }
 
-# ─── Mouse chords for layer-5 ────────────────────────────────
-MOVE_DELTA = 5
-ACCEL_MULTIPLIER = 2
-
-mouse_button_chords = {
-    (0,1): Mouse.LEFT_BUTTON,
-    (2,3): Mouse.RIGHT_BUTTON,
-    (1,2): Mouse.MIDDLE_BUTTON,
-    (0,4): Mouse.BACK_BUTTON,
-    (3,4): Mouse.FORWARD_BUTTON,
-}
-mouse_move_chords = {
-    (0,): (-MOVE_DELTA,  0),
-    (1,): ( MOVE_DELTA,  0),
-    (2,): (       0, -MOVE_DELTA),
-    (3,): (       0,  MOVE_DELTA),
-}
-mouse_scroll_chords = {
-    (0,3):  1,
-    (3,4): -1,
-}
-mouse_hold_chords = {
-    (0,1,4): Mouse.LEFT_BUTTON,
-}
-mouse_release_chords = {
-    (1,2,4): Mouse.LEFT_BUTTON,
-}
-
 # ─── Chord maps for layers 1–3; index 0 unused ──────────────────────────────
 layer_maps = [
     {},
@@ -114,16 +86,47 @@ layer_maps = [
       (1,3):Keycode.NINE,(0,1,2):Keycode.ZERO,
       (0,3):Keycode.UP_ARROW,(1,2,3):Keycode.DOWN_ARROW,
       (0,1,3):Keycode.RIGHT_ARROW,(0,2,3):Keycode.LEFT_ARROW,
-      (0,1,2,3):Keycode.ESCAPE
     },
     { # layer-3: whitespace & delimiters
-      (1,):Keycode.TAB,(2,):Keycode.PERIOD,(3,):Keycode.MINUS,
-      (2,3):Keycode.FORWARD_SLASH,(0,1):Keycode.ENTER,(0,2):Keycode.COMMA,
-      (1,3):Keycode.LEFT_BRACKET,(0,3):Keycode.RIGHT_BRACKET,
-      (1,2,3):Keycode.BACKSLASH,(1,2):Keycode.BACKSPACE,
-      (0,1,3):Keycode.QUOTE,(0,2,3):Keycode.SEMICOLON,(0,1,2,3):Keycode.GRAVE_ACCENT
+      (0,):Keycode.ESCAPE,        (1,):Keycode.TAB,             (2,):Keycode.PERIOD,        (3,):Keycode.MINUS,
+      (2,3):Keycode.FORWARD_SLASH,(0,1):Keycode.ENTER,          (0,2):Keycode.COMMA,        (1,3):Keycode.LEFT_BRACKET,
+      (0,3):Keycode.RIGHT_BRACKET,(1,2,3):Keycode.BACKSLASH,    (1,2):Keycode.BACKSPACE,    (0,1,3):Keycode.QUOTE,
+      (0,2,3):Keycode.SEMICOLON,  (0,1,2,3):Keycode.GRAVE_ACCENT,(0,1,2):Keycode.DELETE
     }
 ]
+
+# ─── Mouse chords for layer-5 (no thumb) ─────────────────────────────
+MOVE_DELTA = 5
+ACCEL_MULTIPLIER = 2
+ACCEL_CHORD = (1, 2, 3)  # three-finger accel combo
+
+mouse_move_chords = {
+    (0,): (-MOVE_DELTA,  0),   # ←
+    (1,): ( MOVE_DELTA,  0),   # →
+    (2,): (       0, -MOVE_DELTA),  # ↑
+    (3,): (       0,  MOVE_DELTA),  # ↓
+}
+
+mouse_button_chords = {
+    (0, 1): Mouse.LEFT_BUTTON,     # left click
+    (0, 2): Mouse.RIGHT_BUTTON,    # right click
+    (1, 2): Mouse.MIDDLE_BUTTON,   # middle click
+    (0, 3): Mouse.BACK_BUTTON,     # back
+    (1, 3): Mouse.FORWARD_BUTTON,  # forward
+}
+
+mouse_scroll_chords = {
+    (2, 3):  1,    # scroll up
+    (0, 2, 3): -1, # scroll down
+}
+
+mouse_hold_chords = {
+    (0, 1, 2): Mouse.LEFT_BUTTON,  # press & hold left
+}
+
+mouse_release_chords = {
+    (0, 1, 3): Mouse.LEFT_BUTTON,  # release left
+}
 
 # ─── Core chord logic with layers 1–5 ──────────────────────────────
 
@@ -171,7 +174,7 @@ def check_chords():
 
     # 3) layer-5 mouse handling with held mode and acceleration
     if layer == 5:
-        accel_active = (4 in combo and len(combo) == 2 and 2 in combo)
+        accel_active = (combo == ACCEL_CHORD)
 
         if combo in mouse_button_chords:
             mouse.click(mouse_button_chords[combo])
