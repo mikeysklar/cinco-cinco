@@ -101,8 +101,8 @@ ACCEL_MULTIPLIER = 2
 ACCEL_CHORD = (1, 2, 3)  # three-finger accel combo
 
 mouse_move_chords = {
-    (0,): (-MOVE_DELTA,  0),   # ←
-    (1,): ( MOVE_DELTA,  0),   # →
+    (0,): ( MOVE_DELTA,  0),   # → 
+    (1,): (-MOVE_DELTA,  0),   # ← 
     (2,): (       0, -MOVE_DELTA),  # ↑
     (3,): (       0,  MOVE_DELTA),  # ↓
 }

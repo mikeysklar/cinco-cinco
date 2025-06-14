@@ -200,21 +200,19 @@ Each layer uses unique key combinations (chords) from the 5 keys (positions 0–
 
 ## Layer 5: Mouse Control (Movement, Scroll, Buttons)
 
-╔══════════════════╦═════╦═════╦═════╦═════╦═════╦════════════╗
-║ Action           ║ Pky ║ Rng ║ Mid ║ Idx ║ Thm ║ Chord      ║
-╠══════════════════╬═════╬═════╬═════╬═════╬═════╬════════════╣
-║ MOVE LEFT        ║     ║     ║     ║  x  ║     ║ (0,)       ║
-║ MOVE RIGHT       ║     ║     ║  x  ║     ║     ║ (1,)       ║
-║ MOVE UP          ║     ║  x  ║     ║     ║     ║ (2,)       ║
-║ MOVE DOWN        ║  x  ║     ║     ║     ║     ║ (3,)       ║
-║ SCROLL UP        ║  x  ║  x  ║     ║     ║     ║ (2,3)      ║
-║ SCROLL DOWN      ║  x  ║  x  ║     ║  x  ║     ║ (0,2,3)    ║
-║ LEFT CLICK       ║     ║     ║  x  ║  x  ║     ║ (0,1)      ║
-║ RIGHT CLICK      ║     ║  x  ║     ║  x  ║     ║ (0,2)      ║
-║ MIDDLE CLICK     ║     ║  x  ║  x  ║     ║     ║ (1,2)      ║
-║ BACK BUTTON      ║  x  ║     ║     ║  x  ║     ║ (0,3)      ║
-║ FORWARD BUTTON   ║  x  ║     ║  x  ║     ║     ║ (1,3)      ║
-║ HOLD LEFT        ║     ║  x  ║  x  ║  x  ║     ║ (0,1,2)    ║
-║ RELEASE LEFT     ║  x  ║     ║  x  ║  x  ║     ║ (0,1,3)    ║
-║ ACCELERATE       ║  x  ║  x  ║  x  ║     ║     ║ (1,2,3)    ║
-╚══════════════════╩═════╩═════╩═════╩═════╩═════╩════════════╝
+| Action           | Pky | Rng | Mid | Idx | Thm | Chord      |
+|------------------|:---:|:---:|:---:|:---:|:---:|------------|
+| MOVE RIGHT       |     |     |     |  x  |     | (0,)       |
+| MOVE LEFT        |     |     |  x  |     |     | (1,)       |
+| MOVE UP          |     |  x  |     |     |     | (2,)       |
+| MOVE DOWN        |  x  |     |     |     |     | (3,)       |
+| SCROLL UP        |  x  |  x  |     |     |     | (2,3)      |
+| SCROLL DOWN      |  x  |  x  |     |  x  |     | (0,2,3)    |
+| LEFT CLICK       |     |     |  x  |  x  |     | (0,1)      |
+| RIGHT CLICK      |     |  x  |     |  x  |     | (0,2)      |
+| MIDDLE CLICK     |     |  x  |  x  |     |     | (1,2)      |
+| BACK BUTTON      |  x  |     |     |  x  |     | (0,3)      |
+| FORWARD BUTTON   |  x  |     |  x  |     |     | (1,3)      |
+| HOLD LEFT        |     |  x  |  x  |  x  |     | (0,1,2)    |
+| RELEASE LEFT     |  x  |     |  x  |  x  |     | (0,1,3)    |
+| ACCELERATE       |  x  |  x  |  x  |     |     | (1,2,3)    |
