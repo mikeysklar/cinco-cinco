@@ -9,6 +9,8 @@ from adafruit_ble.services.standard.hid import HIDService
 from adafruit_hid.keyboard import Keyboard
 from adafruit_hid.mouse import Mouse
 from adafruit_hid.keycode import Keycode
+from adafruit_hid.consumer_control import ConsumerControl
+from adafruit_hid.consumer_control_code import ConsumerControlCode
 
 # ─── Hardware setup ────────────────────────────────────────────────────
 vcc = digitalio.DigitalInOut(board.VCC_OFF)
@@ -29,6 +31,7 @@ hid_svc = HIDService()
 advert = ProvideServicesAdvertisement(hid_svc)
 keyboard = Keyboard(hid_svc.devices)
 mouse = Mouse(hid_svc.devices)
+cc = ConsumerControl(hid_svc.devices)
 ble.start_advertising(advert)
 while not ble.connected:
     pass
@@ -67,7 +70,8 @@ modifier_chords = {
     (3,): Keycode.LEFT_SHIFT,
     (2,): Keycode.LEFT_CONTROL,
     (1,): Keycode.LEFT_ALT,
-    (0,): Keycode.LEFT_GUI
+    (0,): Keycode.LEFT_GUI,
+    (0, 1):   Keycode.RIGHT_ALT     # OPTION (⌥)
 }
 
 # ─── Chord maps for layers 1–3; index 0 unused ──────────────────────────────
@@ -109,8 +113,35 @@ layer_maps = [
         (1, 3):    Keycode.INSERT,        # Insert
         (1, 2, 3): Keycode.HOME           # Home
     },
-    {},  # 6 placeholder (unused)
-    {}   # 7 placeholder (mouse handled in code)
+    {   # 6: macOS media keys
+        (0,):       ConsumerControlCode.BRIGHTNESS_DECREMENT,
+        (1,):       ConsumerControlCode.BRIGHTNESS_INCREMENT,
+        (2,):       ConsumerControlCode.VOLUME_DECREMENT,
+        (3,):       ConsumerControlCode.VOLUME_INCREMENT,
+        (0, 1):     ConsumerControlCode.MUTE,
+        (2, 3):     ConsumerControlCode.PLAY_PAUSE,
+        (0, 2):     ConsumerControlCode.SCAN_NEXT_TRACK,
+        (1, 3):     ConsumerControlCode.SCAN_PREVIOUS_TRACK,
+        (0, 3):     ConsumerControlCode.FAST_FORWARD,
+        (1, 2):     ConsumerControlCode.REWIND,
+        (0, 1, 2):  ConsumerControlCode.STOP,
+        (0, 1, 3):  ConsumerControlCode.EJECT,
+    },
+    {},   # 7 placeholder (mouse handled in code)
+    {   # 8: function keys F1–F12
+        (0,):      Keycode.F1,
+        (1,):      Keycode.F2,
+        (2,):      Keycode.F3,
+        (3,):      Keycode.F4,
+        (0, 1):    Keycode.F5,
+        (0, 2):    Keycode.F6,
+        (0, 3):    Keycode.F7,
+        (1, 2):    Keycode.F8,
+        (1, 3):    Keycode.F9,
+        (2, 3):    Keycode.F10,
+        (0, 1, 2): Keycode.F11,
+        (0, 1, 3): Keycode.F12,
+    },
 ]
 
 # ─── Mouse chords for layer-7 (no thumb) ─────────────────────────────
@@ -167,7 +198,7 @@ def check_chords():
         else:
             thumb_taps = 1
         last_tap_time = now
-        layer = min(thumb_taps, 7)
+        layer = min(thumb_taps, 8)
         print(f"→ locked to layer-{layer}")
         last_combo = ()
         pending_combo = None
@@ -202,6 +233,14 @@ def check_chords():
             sent_release = True
             held_nav_combo = combo
             last_nav = now
+        return
+
+    # ─── layer-6 ⇒ macOS media keys ───────────────────────────────────
+    if layer == 6 and combo in layer_maps[6]:
+        print(f"→ media L6 combo {combo} → {layer_maps[6][combo]!r}")
+        cc.send(layer_maps[6][combo])
+        sent_release = True
+        time.sleep(DEBOUNCE_UP)
         return
 
     # layer-7 mouse handling with held mode and acceleration
@@ -275,7 +314,7 @@ def check_chords():
                 thumb_taps = 1
                 modifier_armed = False
                 skip_scag = False
-            elif layer in (1, 2, 3):
+            elif layer in (1, 2, 3, 6, 8):
                 use = pending_combo or last_combo
                 if use != (4,):
                     kc = layer_maps[layer].get(use)
