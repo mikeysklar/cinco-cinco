@@ -41,6 +41,7 @@ DEBOUNCE_UP      = 0.05  # pause after send
 TAP_WINDOW       = 0.5   # thumb-tap window
 MIN_TAP_INT      = 0.1   # thumb debounce
 L5_REPEAT_MS     = 0.1   # repeat interval for held moves
+NAV_REPEAT_MS    = 0.2   # min seconds between repeats on layer-5 nav
 
 # ─── State variables ────────────────────────────────────────────────
 layer            = 1     # layers 1..5
@@ -58,6 +59,8 @@ last_time        = time.monotonic()
 held_combo       = ()
 last_repeat      = 0.0
 accel_active     = False
+held_nav_combo   = ()
+last_nav         = 0.0
 
 # ─── SCAG modifier chords for layer-4 ───────────────────────────────
 modifier_chords = {
@@ -92,10 +95,25 @@ layer_maps = [
       (2,3):Keycode.FORWARD_SLASH,(0,1):Keycode.ENTER,          (0,2):Keycode.COMMA,        (1,3):Keycode.LEFT_BRACKET,
       (0,3):Keycode.RIGHT_BRACKET,(1,2,3):Keycode.BACKSLASH,    (1,2):Keycode.BACKSPACE,    (0,1,3):Keycode.QUOTE,
       (0,2,3):Keycode.SEMICOLON,  (0,1,2,3):Keycode.GRAVE_ACCENT,(0,1,2):Keycode.DELETE
-    }
+    },
+   {},  # 4: SCAG is handled via modifier_chords, not layer_maps
+    {   # 5: navigation layer
+        (0,):      Keycode.RIGHT_ARROW,   # →
+        (1,):      Keycode.LEFT_ARROW,    # ←
+        (2,):      Keycode.DOWN_ARROW,    # ↓
+        (3,):      Keycode.UP_ARROW,      # ↑
+        (0, 1):    Keycode.PAGE_UP,       # PgUp
+        (2, 3):    Keycode.PAGE_DOWN,     # PgDn
+        (0, 1, 2): Keycode.END,           # End
+        (0, 2):    Keycode.DELETE,        # Delete
+        (1, 3):    Keycode.INSERT,        # Insert
+        (1, 2, 3): Keycode.HOME           # Home
+    },
+    {},  # 6 placeholder (unused)
+    {}   # 7 placeholder (mouse handled in code)
 ]
 
-# ─── Mouse chords for layer-5 (no thumb) ─────────────────────────────
+# ─── Mouse chords for layer-7 (no thumb) ─────────────────────────────
 MOVE_DELTA = 5
 ACCEL_MULTIPLIER = 2
 ACCEL_CHORD = (1, 2, 3)  # three-finger accel combo
@@ -134,6 +152,7 @@ def check_chords():
     global layer, thumb_taps, tap_in_prog, last_tap_time
     global last_combo, pending_combo, sent_release, skip_scag, scag_skip_combo
     global modifier_armed, held_modifier, last_time, held_combo, last_repeat, accel_active
+    global held_nav_combo, last_nav
 
     now = time.monotonic()
     pressed = tuple(not p.value for p in pins)
@@ -148,7 +167,7 @@ def check_chords():
         else:
             thumb_taps = 1
         last_tap_time = now
-        layer = min(thumb_taps, 5)
+        layer = min(thumb_taps, 7)
         print(f"→ locked to layer-{layer}")
         last_combo = ()
         pending_combo = None
@@ -161,7 +180,7 @@ def check_chords():
     if not thumb:
         tap_in_prog = False
 
-    # 2) chord detect & stabilize
+    #  chord detect & stabilize
     combo = tuple(i for i,b in enumerate(pressed) if b)
     if combo != last_combo:
         last_time = now
@@ -172,8 +191,21 @@ def check_chords():
     if combo and (now - last_time) >= ms and combo != pending_combo:
         pending_combo = combo
 
-    # 3) layer-5 mouse handling with held mode and acceleration
-    if layer == 5:
+    # ─── layer-5 ⇒ navigation keys with repeat throttle ─────────────
+    if layer == 5 and combo in layer_maps[5]:
+        now = time.monotonic()
+        # fire on new combo or after NAV_REPEAT_MS has elapsed
+        if combo != held_nav_combo or (now - last_nav) >= NAV_REPEAT_MS:
+            kc = layer_maps[5][combo]
+            keyboard.press(kc)
+            keyboard.release_all()
+            sent_release = True
+            held_nav_combo = combo
+            last_nav = now
+        return
+
+    # layer-7 mouse handling with held mode and acceleration
+    if layer == 7:
         accel_active = (combo == ACCEL_CHORD)
 
         if combo in mouse_button_chords:
@@ -259,6 +291,7 @@ def check_chords():
     if combo == () and last_combo != ():
         pending_combo = None
         sent_release = False
+        held_nav_combo = ()      # ← reset nav‐repeat state 
 
     last_combo = combo
 
