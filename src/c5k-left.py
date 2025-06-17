@@ -11,6 +11,7 @@ from adafruit_hid.mouse import Mouse
 from adafruit_hid.keycode import Keycode
 from adafruit_hid.consumer_control import ConsumerControl
 from adafruit_hid.consumer_control_code import ConsumerControlCode
+import chords_config
 
 # ─── Hardware setup ────────────────────────────────────────────────────
 vcc = digitalio.DigitalInOut(board.VCC_OFF)
@@ -65,132 +66,49 @@ accel_active     = False
 held_nav_combo   = ()
 last_nav         = 0.0
 
-# ─── SCAG modifier chords for layer-4 ───────────────────────────────
-modifier_chords = {
-    (3,): Keycode.LEFT_SHIFT,
-    (2,): Keycode.LEFT_CONTROL,
-    (1,): Keycode.LEFT_ALT,
-    (0,): Keycode.LEFT_GUI,
-    (0, 1):   Keycode.RIGHT_ALT     # OPTION (⌥)
-}
+# ─── Chord maps ──────────────────────────────
 
-# ─── Chord maps for layers 1–3; index 0 unused ──────────────────────────────
-layer_maps = [
-    {},
-    { # layer-1: alpha
-      (0,):Keycode.E,(1,):Keycode.I,(2,):Keycode.A,(3,):Keycode.S,
-      (0,1):Keycode.R,(0,2):Keycode.O,(0,3):Keycode.C,(1,2):Keycode.N,
-      (1,3):Keycode.L,(2,3):Keycode.T,(0,1,2):Keycode.D,(1,2,3):Keycode.P,
-      (0,1,2,3):Keycode.U,(0,2,3):Keycode.SPACE,(0,1,3):Keycode.BACKSPACE,
-      (0,4):Keycode.M,(1,4):Keycode.G,(2,4):Keycode.H,(3,4):Keycode.B,
-      (0,1,4):Keycode.Y,(0,2,4):Keycode.W,(0,3,4):Keycode.X,
-      (1,2,4):Keycode.F,(1,3,4):Keycode.K,(2,3,4):Keycode.V,
-      (0,1,2,4):Keycode.J,(1,2,3,4):Keycode.Z,(0,1,2,3,4):Keycode.Q
-    },
-    { # layer-2: numbers & arrows
-      (0,):Keycode.ONE,(1,):Keycode.TWO,(2,):Keycode.THREE,(3,):Keycode.FOUR,
-      (0,1):Keycode.FIVE,(1,2):Keycode.SIX,(2,3):Keycode.SEVEN,(0,2):Keycode.EIGHT,
-      (1,3):Keycode.NINE,(0,1,2):Keycode.ZERO,
-      (0,3):Keycode.UP_ARROW,(1,2,3):Keycode.DOWN_ARROW,
-      (0,1,3):Keycode.RIGHT_ARROW,(0,2,3):Keycode.LEFT_ARROW,
-    },
-    { # layer-3: whitespace & delimiters
-      (0,):Keycode.ESCAPE,        (1,):Keycode.TAB,             (2,):Keycode.PERIOD,        (3,):Keycode.MINUS,
-      (2,3):Keycode.FORWARD_SLASH,(0,1):Keycode.ENTER,          (0,2):Keycode.COMMA,        (1,3):Keycode.LEFT_BRACKET,
-      (0,3):Keycode.RIGHT_BRACKET,(1,2,3):Keycode.BACKSLASH,    (1,2):Keycode.BACKSPACE,    (0,1,3):Keycode.QUOTE,
-      (0,2,3):Keycode.SEMICOLON,  (0,1,2,3):Keycode.GRAVE_ACCENT,(0,1,2):Keycode.DELETE
-    },
-   {},  # 4: SCAG is handled via modifier_chords, not layer_maps
-    {   # 5: navigation layer
-        (0,):      Keycode.RIGHT_ARROW,   # →
-        (1,):      Keycode.LEFT_ARROW,    # ←
-        (2,):      Keycode.DOWN_ARROW,    # ↓
-        (3,):      Keycode.UP_ARROW,      # ↑
-        (0, 1):    Keycode.PAGE_UP,       # PgUp
-        (2, 3):    Keycode.PAGE_DOWN,     # PgDn
-        (0, 1, 2): Keycode.END,           # End
-        (0, 2):    Keycode.DELETE,        # Delete
-        (1, 3):    Keycode.INSERT,        # Insert
-        (1, 2, 3): Keycode.HOME           # Home
-    },
-    {   # 6: macOS media keys
-        (0,):       ConsumerControlCode.BRIGHTNESS_DECREMENT,
-        (1,):       ConsumerControlCode.BRIGHTNESS_INCREMENT,
-        (2,):       ConsumerControlCode.VOLUME_DECREMENT,
-        (3,):       ConsumerControlCode.VOLUME_INCREMENT,
-        (0, 1):     ConsumerControlCode.MUTE,
-        (2, 3):     ConsumerControlCode.PLAY_PAUSE,
-        (0, 2):     ConsumerControlCode.SCAN_NEXT_TRACK,
-        (1, 3):     ConsumerControlCode.SCAN_PREVIOUS_TRACK,
-        (0, 3):     ConsumerControlCode.FAST_FORWARD,
-        (1, 2):     ConsumerControlCode.REWIND,
-        (0, 1, 2):  ConsumerControlCode.STOP,
-        (0, 1, 3):  ConsumerControlCode.EJECT,
-    },
-    {},   # 7 placeholder (mouse handled in code)
-    {   # 8: function keys F1–F12
-        (0,):      Keycode.F1,
-        (1,):      Keycode.F2,
-        (2,):      Keycode.F3,
-        (3,):      Keycode.F4,
-        (0, 1):    Keycode.F5,
-        (0, 2):    Keycode.F6,
-        (0, 3):    Keycode.F7,
-        (1, 2):    Keycode.F8,
-        (1, 3):    Keycode.F9,
-        (2, 3):    Keycode.F10,
-        (0, 1, 2): Keycode.F11,
-        (0, 1, 3): Keycode.F12,
-    },
-]
+def get_chord_mapping(layer):
+    # Add/adjust as needed for your layer switching logic!
+    return {
+        1: layer1_chords,
+        2: layer2_chords,
+        3: layer3_chords,
+        4: modifier_chords,
+        5: layer5_chords,
+        6: layer6_chords,
+        7: {  # Mouse
+            "move": mouse_move_chords,
+            "button": mouse_button_chords,
+            "scroll": mouse_scroll_chords,
+            "hold": mouse_hold_chords,
+            "release": mouse_release_chords,
+            "accel": ACCEL_CHORD,
+        },
+        8: layer8_chords,
+    }[layer]
 
 # ─── Mouse chords for layer-7 (no thumb) ─────────────────────────────
 MOVE_DELTA = 5
 ACCEL_MULTIPLIER = 2
 ACCEL_CHORD = (1, 2, 3)  # three-finger accel combo
 
-mouse_move_chords = {
-    (0,): ( MOVE_DELTA,  0),   # → 
-    (1,): (-MOVE_DELTA,  0),   # ← 
-    (2,): (       0, -MOVE_DELTA),  # ↑
-    (3,): (       0,  MOVE_DELTA),  # ↓
-}
-
-mouse_button_chords = {
-    (0, 1): Mouse.LEFT_BUTTON,     # left click
-    (0, 2): Mouse.RIGHT_BUTTON,    # right click
-    (1, 2): Mouse.MIDDLE_BUTTON,   # middle click
-    (0, 3): Mouse.BACK_BUTTON,     # back
-    (1, 3): Mouse.FORWARD_BUTTON,  # forward
-}
-
-mouse_scroll_chords = {
-    (2, 3):  1,    # scroll up
-    (0, 2, 3): -1, # scroll down
-}
-
-mouse_hold_chords = {
-    (0, 1, 2): Mouse.LEFT_BUTTON,  # press & hold left
-}
-
-mouse_release_chords = {
-    (0, 1, 3): Mouse.LEFT_BUTTON,  # release left
-}
-
 # ─── Core chord logic with layers 1–5 ──────────────────────────────
 
 def check_chords():
     global layer, thumb_taps, tap_in_prog, last_tap_time
     global last_combo, pending_combo, sent_release, skip_scag, scag_skip_combo
-    global modifier_armed, held_modifier, last_time, held_combo, last_repeat, accel_active
-    global held_nav_combo, last_nav
+    global modifier_armed, held_modifier, last_repeat, accel_active
+    global held_nav_combo, last_nav, last_time
 
-    now = time.monotonic()
+    lm = chords_config.layer_maps[layer]
+
+    now   = time.monotonic()
     pressed = tuple(not p.value for p in pins)
-    finger = any(pressed[:4])
-    thumb = pressed[4]
+    finger  = any(pressed[:4])
+    thumb   = pressed[4]
 
-    # 1) thumb taps → lock layers 1–5
+    # 0) thumb-tap layer lock
     if thumb and not finger and not tap_in_prog:
         tap_in_prog = True
         if now - last_tap_time < TAP_WINDOW:
@@ -200,6 +118,7 @@ def check_chords():
         last_tap_time = now
         layer = min(thumb_taps, 8)
         print(f"→ locked to layer-{layer}")
+        # reset combo state
         last_combo = ()
         pending_combo = None
         sent_release = False
@@ -211,9 +130,10 @@ def check_chords():
     if not thumb:
         tap_in_prog = False
 
-    #  chord detect & stabilize
-    combo = tuple(i for i,b in enumerate(pressed) if b)
+    # 1) read & stabilize combo
+    combo = tuple(i for i, down in enumerate(pressed) if down)
     if combo != last_combo:
+        # just started a new chord
         last_time = now
         if last_combo == () and combo != ():
             pending_combo = None
@@ -222,76 +142,79 @@ def check_chords():
     if combo and (now - last_time) >= ms and combo != pending_combo:
         pending_combo = combo
 
-    # ─── layer-5 ⇒ navigation keys with repeat throttle ─────────────
-    if layer == 5 and combo in layer_maps[5]:
-        now = time.monotonic()
-        # fire on new combo or after NAV_REPEAT_MS has elapsed
-        if combo != held_nav_combo or (now - last_nav) >= NAV_REPEAT_MS:
-            kc = layer_maps[5][combo]
+    # 2) pull in this layer’s map
+    lm = chords_config.layer_maps[layer]
+
+    # 3a) layer-5 nav w/repeat
+    if layer == 5 and pending_combo in lm:
+        if pending_combo != held_nav_combo or (now - last_nav) >= NAV_REPEAT_MS:
+            kc = lm[pending_combo]
             keyboard.press(kc)
             keyboard.release_all()
-            sent_release = True
-            held_nav_combo = combo
+            held_nav_combo = pending_combo
             last_nav = now
+            sent_release = True
         return
 
-    # ─── layer-6 ⇒ macOS media keys ───────────────────────────────────
-    if layer == 6 and combo in layer_maps[6]:
-        print(f"→ media L6 combo {combo} → {layer_maps[6][combo]!r}")
-        cc.send(layer_maps[6][combo])
+    # 3b) layer-6 media
+    if layer == 6 and pending_combo in lm:
+        print(f"→ media L6 combo {pending_combo} → {lm[pending_combo]!r}")
+        cc.send(lm[pending_combo])
         sent_release = True
         time.sleep(DEBOUNCE_UP)
         return
 
-    # layer-7 mouse handling with held mode and acceleration
+    # 3c) layer-7 mouse
     if layer == 7:
-        accel_active = (combo == ACCEL_CHORD)
-
-        if combo in mouse_button_chords:
-            mouse.click(mouse_button_chords[combo])
+        accel_active = (pending_combo == chords_config.ACCEL_CHORD)
+        # buttons
+        if pending_combo in chords_config.mouse_button_chords:
+            mouse.click(chords_config.mouse_button_chords[pending_combo])
             sent_release = True
             time.sleep(DEBOUNCE_UP)
             return
-        if combo in mouse_scroll_chords:
-            scroll_amount = mouse_scroll_chords[combo]
+        # scroll
+        if pending_combo in chords_config.mouse_scroll_chords:
+            amt = chords_config.mouse_scroll_chords[pending_combo]
             if accel_active:
-                scroll_amount *= ACCEL_MULTIPLIER
-            mouse.move(wheel=scroll_amount)
+                amt *= ACCEL_MULTIPLIER
+            mouse.move(wheel=amt)
             sent_release = True
             time.sleep(DEBOUNCE_UP)
             return
-        if combo in mouse_move_chords:
-            dx, dy = mouse_move_chords[combo]
+        # move
+        if pending_combo in chords_config.mouse_move_chords:
+            dx, dy = chords_config.mouse_move_chords[pending_combo]
             if accel_active:
                 dx *= ACCEL_MULTIPLIER
                 dy *= ACCEL_MULTIPLIER
             mouse.move(dx, dy)
-            held_combo = combo
+            held_combo = pending_combo
             last_repeat = now
             sent_release = True
             return
-        if combo == held_combo and (now - last_repeat) >= L5_REPEAT_MS:
-            dx, dy = mouse_move_chords.get(combo, (0, 0))
+        # repeat move
+        if pending_combo == held_combo and (now - last_repeat) >= L5_REPEAT_MS:
+            dx, dy = chords_config.mouse_move_chords[held_combo]
             if accel_active:
                 dx *= ACCEL_MULTIPLIER
                 dy *= ACCEL_MULTIPLIER
             mouse.move(dx, dy)
             last_repeat = now
             return
-        if combo != held_combo:
-            held_combo = ()
-        if combo in mouse_hold_chords:
-            mouse.press(mouse_hold_chords[combo])
+        # hold & release
+        if pending_combo in chords_config.mouse_hold_chords:
+            mouse.press(chords_config.mouse_hold_chords[pending_combo])
             sent_release = True
             return
-        if combo in mouse_release_chords:
-            mouse.release(mouse_release_chords[combo])
+        if pending_combo in chords_config.mouse_release_chords:
+            mouse.release(chords_config.mouse_release_chords[pending_combo])
             sent_release = True
             return
 
-    # 4) SCAG logic for layer-4
-    if layer == 4 and not modifier_armed and pending_combo in modifier_chords:
-        held_modifier = modifier_chords[pending_combo]
+    # 4) layer-4 SCAG “arm”
+    if layer == 4 and not modifier_armed and pending_combo in chords_config.modifier_chords:
+        held_modifier = chords_config.modifier_chords[pending_combo]
         modifier_armed = True
         scag_skip_combo = pending_combo
         skip_scag = True
@@ -300,13 +223,16 @@ def check_chords():
         last_combo = ()
         return
 
-    # 5) first-release send for layers 1–4
+    # 5) first-release send (layers 1–4,6,8)
     if len(combo) < len(last_combo) and last_combo and not sent_release:
+        # skip SCAG if needed
         if skip_scag and last_combo == scag_skip_combo:
             skip_scag = False
         else:
-            if layer == 4 and modifier_armed and last_combo in layer_maps[1]:
-                key = layer_maps[1][last_combo]
+            use = pending_combo or last_combo
+            # SCAG send
+            if layer == 4 and modifier_armed and last_combo in chords_config.layer1_chords:
+                key = chords_config.layer1_chords[last_combo]
                 keyboard.press(held_modifier, key)
                 keyboard.release_all()
                 print(f"→ sent {held_modifier}+{key}")
@@ -314,25 +240,26 @@ def check_chords():
                 thumb_taps = 1
                 modifier_armed = False
                 skip_scag = False
+            # normal layers
             elif layer in (1, 2, 3, 6, 8):
-                use = pending_combo or last_combo
-                if use != (4,):
-                    kc = layer_maps[layer].get(use)
+                if use != (4,):  # ignore lone thumb
+                    kc = lm.get(use)
                     if kc:
                         keyboard.press(kc)
                         keyboard.release_all()
                     else:
-                        print(f"Unknown L{layer}: {use}")
+                        print(f"Unknown L{layer}: {use!r}")
         sent_release = True
         time.sleep(DEBOUNCE_UP)
 
     # 6) clear on full release
-    if combo == () and last_combo != ():
-        pending_combo = None
-        sent_release = False
-        held_nav_combo = ()      # ← reset nav‐repeat state 
+    if not combo and last_combo:
+        pending_combo   = None
+        sent_release    = False
+        held_nav_combo  = ()
 
     last_combo = combo
+
 
 # ─── Main loop ────────────────────────────────────────────────
 while ble.connected:
