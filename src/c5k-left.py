@@ -46,6 +46,7 @@ TAP_WINDOW       = 0.5   # thumb-tap window
 MIN_TAP_INT      = 0.1   # thumb debounce
 L5_REPEAT_MS     = 0.1   # repeat interval for held moves
 NAV_REPEAT_MS    = 0.2   # min seconds between repeats on layer-5 nav
+LAYER_LOCK_COOLDOWN = 0.1  # minimum seconds between layer‐lock taps
 
 # ─── State variables ────────────────────────────────────────────────
 layer            = 1     # layers 1..5
@@ -65,11 +66,13 @@ last_repeat      = 0.0
 accel_active     = False
 held_nav_combo   = ()
 last_nav         = 0.0
+last_pending_combo = None
+last_layer_change = 0.0
+skip_layer_lock = False
 
 # ─── Chord maps ──────────────────────────────
 
 def get_chord_mapping(layer):
-    # Add/adjust as needed for your layer switching logic!
     return {
         1: layer1_chords,
         2: layer2_chords,
@@ -98,18 +101,38 @@ ACCEL_CHORD = (1, 2, 3)  # three-finger accel combo
 def check_chords():
     global layer, thumb_taps, tap_in_prog, last_tap_time
     global last_combo, pending_combo, sent_release, skip_scag, scag_skip_combo
-    global modifier_armed, held_modifier, last_repeat, accel_active
-    global held_nav_combo, last_nav, last_time
+    global modifier_armed, held_modifier, last_time, last_repeat, accel_active
+    global held_nav_combo, last_nav, held_combo, last_pending_combo, last_layer_change
+    global skip_layer_lock
 
-    lm = chords_config.layer_maps[layer]
-
-    now   = time.monotonic()
+    now = time.monotonic()
+    # Read all 5 pins (0–3 fingers, 4 thumb)
     pressed = tuple(not p.value for p in pins)
-    finger  = any(pressed[:4])
-    thumb   = pressed[4]
 
-    # 0) thumb-tap layer lock
-    if thumb and not finger and not tap_in_prog:
+    # ─── 1) Build & stabilize combo (pending_combo) ────────────────────
+    combo = tuple(i for i, down in enumerate(pressed) if down)
+    if combo != last_combo:
+        last_time = now
+        if last_combo == () and combo != ():
+            pending_combo = None
+            sent_release   = False
+    ms = STABLE_MS_ALPHA if layer == 1 else STABLE_MS_OTHER
+    if combo and (now - last_time) >= ms and combo != pending_combo:
+        pending_combo = combo
+    pending_changed = (pending_combo != last_pending_combo)
+    last_pending_combo = pending_combo
+
+    # ─── 2) Pure-thumb tap ⇒ lock layers (only when pending_combo==(4,)) ─
+    if (
+        not skip_layer_lock
+        and pending_combo == (4,)
+        and pending_changed
+        and (now - last_layer_change) >= LAYER_LOCK_COOLDOWN
+    ):
+        # record when we changed
+        last_layer_change = now
+
+        # then your existing lock logic:
         tap_in_prog = True
         if now - last_tap_time < TAP_WINDOW:
             thumb_taps += 1
@@ -118,45 +141,37 @@ def check_chords():
         last_tap_time = now
         layer = min(thumb_taps, 8)
         print(f"→ locked to layer-{layer}")
+
         # reset combo state
-        last_combo = ()
-        pending_combo = None
-        sent_release = False
-        skip_scag = False
-        modifier_armed = False
-        held_modifier = None
+        last_combo      = ()
+        pending_combo   = None
+        sent_release    = False
+        skip_scag       = False
+        modifier_armed  = False
+        held_modifier   = None
         scag_skip_combo = None
+        skip_layer_lock = False 
         return
-    if not thumb:
+
+    # allow next pure-thumb once you lift off
+    if pending_combo != (4,):
         tap_in_prog = False
 
-    # 1) read & stabilize combo
-    combo = tuple(i for i, down in enumerate(pressed) if down)
-    if combo != last_combo:
-        # just started a new chord
-        last_time = now
-        if last_combo == () and combo != ():
-            pending_combo = None
-            sent_release = False
-    ms = STABLE_MS_ALPHA if layer == 1 else STABLE_MS_OTHER
-    if combo and (now - last_time) >= ms and combo != pending_combo:
-        pending_combo = combo
-
-    # 2) pull in this layer’s map
+    # Grab this layer’s mapping
     lm = chords_config.layer_maps[layer]
 
-    # 3a) layer-5 nav w/repeat
+    # ─── 3) Layer-5: Navigation with repeat throttle ───────────────────
     if layer == 5 and pending_combo in lm:
         if pending_combo != held_nav_combo or (now - last_nav) >= NAV_REPEAT_MS:
             kc = lm[pending_combo]
             keyboard.press(kc)
             keyboard.release_all()
             held_nav_combo = pending_combo
-            last_nav = now
-            sent_release = True
+            last_nav       = now
+            sent_release   = True
         return
 
-    # 3b) layer-6 media
+    # ─── 4) Layer-6: macOS media keys ─────────────────────────────────
     if layer == 6 and pending_combo in lm:
         print(f"→ media L6 combo {pending_combo} → {lm[pending_combo]!r}")
         cc.send(lm[pending_combo])
@@ -164,15 +179,17 @@ def check_chords():
         time.sleep(DEBOUNCE_UP)
         return
 
-    # 3c) layer-7 mouse
+    # ─── 5) Layer-7: Mouse (move, click, scroll, hold/release) ─────────
     if layer == 7:
         accel_active = (pending_combo == chords_config.ACCEL_CHORD)
+
         # buttons
         if pending_combo in chords_config.mouse_button_chords:
             mouse.click(chords_config.mouse_button_chords[pending_combo])
             sent_release = True
             time.sleep(DEBOUNCE_UP)
             return
+
         # scroll
         if pending_combo in chords_config.mouse_scroll_chords:
             amt = chords_config.mouse_scroll_chords[pending_combo]
@@ -182,6 +199,7 @@ def check_chords():
             sent_release = True
             time.sleep(DEBOUNCE_UP)
             return
+
         # move
         if pending_combo in chords_config.mouse_move_chords:
             dx, dy = chords_config.mouse_move_chords[pending_combo]
@@ -189,10 +207,11 @@ def check_chords():
                 dx *= ACCEL_MULTIPLIER
                 dy *= ACCEL_MULTIPLIER
             mouse.move(dx, dy)
-            held_combo = pending_combo
+            held_combo  = pending_combo
             last_repeat = now
             sent_release = True
             return
+
         # repeat move
         if pending_combo == held_combo and (now - last_repeat) >= L5_REPEAT_MS:
             dx, dy = chords_config.mouse_move_chords[held_combo]
@@ -202,6 +221,7 @@ def check_chords():
             mouse.move(dx, dy)
             last_repeat = now
             return
+
         # hold & release
         if pending_combo in chords_config.mouse_hold_chords:
             mouse.press(chords_config.mouse_hold_chords[pending_combo])
@@ -212,37 +232,38 @@ def check_chords():
             sent_release = True
             return
 
-    # 4) layer-4 SCAG “arm”
+    # ─── 6) Layer-4 SCAG “arm” ──────────────────────────────────────────
     if layer == 4 and not modifier_armed and pending_combo in chords_config.modifier_chords:
-        held_modifier = chords_config.modifier_chords[pending_combo]
-        modifier_armed = True
+        held_modifier   = chords_config.modifier_chords[pending_combo]
+        modifier_armed  = True
         scag_skip_combo = pending_combo
-        skip_scag = True
+        skip_scag       = True
         print(f"→ modifier armed: {held_modifier}")
         pending_combo = None
-        last_combo = ()
+        last_combo    = ()
         return
 
-    # 5) first-release send (layers 1–4,6,8)
+    # ─── 7) First-release send for layers 1–4,6,8 ───────────────────────
     if len(combo) < len(last_combo) and last_combo and not sent_release:
-        # skip SCAG if needed
+        # skip SCAG if it’s the skip combo
         if skip_scag and last_combo == scag_skip_combo:
             skip_scag = False
         else:
+            skip_layer_lock = True
             use = pending_combo or last_combo
-            # SCAG send
+            # SCAG send (layer-4)
             if layer == 4 and modifier_armed and last_combo in chords_config.layer1_chords:
                 key = chords_config.layer1_chords[last_combo]
                 keyboard.press(held_modifier, key)
                 keyboard.release_all()
                 print(f"→ sent {held_modifier}+{key}")
-                layer = 1
-                thumb_taps = 1
+                layer       = 1
+                thumb_taps  = 1
                 modifier_armed = False
-                skip_scag = False
+                skip_scag      = False
             # normal layers
             elif layer in (1, 2, 3, 6, 8):
-                if use != (4,):  # ignore lone thumb
+                if use != (4,):  # ignore pure thumb
                     kc = lm.get(use)
                     if kc:
                         keyboard.press(kc)
@@ -252,14 +273,15 @@ def check_chords():
         sent_release = True
         time.sleep(DEBOUNCE_UP)
 
-    # 6) clear on full release
+    # ─── 8) Clear on full release ────────────────────────────────────────
     if not combo and last_combo:
-        pending_combo   = None
-        sent_release    = False
-        held_nav_combo  = ()
+        pending_combo  = None
+        sent_release   = False
+        held_nav_combo = ()
+        skip_layer_lock = False
 
+    # Save for next pass
     last_combo = combo
-
 
 # ─── Main loop ────────────────────────────────────────────────
 while ble.connected:

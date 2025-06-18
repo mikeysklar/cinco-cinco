@@ -38,7 +38,8 @@ layer1_chords = {  # layer-1: alpha
 }
 
 # ────────────── Layer 2: Numbers & Arrows ──────────────
-layer2_chords = {  # layer-2: numbers & arrows
+layer2_chords = {  # layer-2: numbers & thumb-based arrows
+    # Numbers (unchanged)
     (0,):           Keycode.ONE,
     (1,):           Keycode.TWO,
     (2,):           Keycode.THREE,
@@ -49,10 +50,20 @@ layer2_chords = {  # layer-2: numbers & arrows
     (0, 2):         Keycode.EIGHT,
     (1, 3):         Keycode.NINE,
     (0, 1, 2):      Keycode.ZERO,
-    (0, 3):         Keycode.UP_ARROW,
-    (1, 2, 3):      Keycode.DOWN_ARROW,
-    (0, 1, 3):      Keycode.RIGHT_ARROW,
-    (0, 2, 3):      Keycode.LEFT_ARROW,
+
+    # Thumb-based ARROWS 
+    (0, 4):         Keycode.UP_ARROW,
+    (1, 4):         Keycode.DOWN_ARROW,
+    (2, 4):         Keycode.RIGHT_ARROW,
+    (3, 4):         Keycode.LEFT_ARROW,
+
+    # Thumb-based NAV
+    (0, 1, 4):      Keycode.PAGE_UP,
+    (2, 3, 4):      Keycode.PAGE_DOWN,
+    (0, 1, 2, 4):   Keycode.END,
+    (0, 2, 4):      Keycode.DELETE,
+    (1, 3, 4):      Keycode.INSERT,
+    (1, 2, 3, 4):   Keycode.HOME,
 }
 
 # ────────────── Layer 3: Whitespace & Delimiters ──────────────
@@ -84,17 +95,28 @@ modifier_chords = {
 }
 
 # ────────────── Layer 5: Navigation ──────────────
-layer5_chords = {   # 5: navigation layer
-    (0,):           Keycode.RIGHT_ARROW,   # →
-    (1,):           Keycode.LEFT_ARROW,    # ←
-    (2,):           Keycode.DOWN_ARROW,    # ↓
-    (3,):           Keycode.UP_ARROW,      # ↑
-    (0, 1):         Keycode.PAGE_UP,       # PgUp
-    (2, 3):         Keycode.PAGE_DOWN,     # PgDn
-    (0, 1, 2):      Keycode.END,           # End
-    (0, 2):         Keycode.DELETE,        # Delete
-    (1, 3):         Keycode.INSERT,        # Insert
-    (1, 2, 3):      Keycode.HOME,          # Home
+layer5_chords = {   # 5: web navigation layer
+
+    # Directional browsing (same orientation as arrows in Layer-2)
+    (0, 4):         Keycode.PAGE_UP,                         # Up → PgUp
+    (1, 4):         Keycode.PAGE_DOWN,                       # Down → PgDn
+    (2, 4):         (Keycode.SHIFT, Keycode.BACKSPACE),      # Right → Forward
+    (3, 4):         Keycode.BACKSPACE,                       # Left → Back
+
+    # Tab & window management
+    (0, 1):         (Keycode.CONTROL, Keycode.T),            # New Tab
+    (1, 2):         (Keycode.CONTROL, Keycode.W),            # Close Tab
+    (2, 3):         (Keycode.CONTROL, Keycode.SHIFT, Keycode.T),  # Reopen Closed Tab
+    (0, 2):         (Keycode.CONTROL, Keycode.N),            # New Window
+    (1, 3):         (Keycode.CONTROL, Keycode.SHIFT, Keycode.W),  # Close Window
+
+    # Page utilities
+    (0, 1, 4):      (Keycode.CONTROL, Keycode.R),            # Refresh
+    (1, 2, 4):      (Keycode.CONTROL, Keycode.SHIFT, Keycode.R),  # Hard Refresh
+    (2, 3, 4):      (Keycode.CONTROL, Keycode.L),            # Focus Address Bar
+    (0, 3):         (Keycode.CONTROL, Keycode.F),            # Find on Page
+    (0, 2, 3):      (Keycode.CONTROL, Keycode.H),            # History
+    (1, 2, 3):      (Keycode.CONTROL, Keycode.J),            # Download
 }
 
 # ────────────── Layer 6: macOS Media Keys ──────────────
