@@ -94,47 +94,6 @@ modifier_chords = {
     (0, 1):     Keycode.RIGHT_ALT,     # OPTION (⌥)
 }
 
-# ────────────── Layer 5: Navigation ──────────────
-layer5_chords = {   # 5: web navigation layer
-
-    # Directional browsing (same orientation as arrows in Layer-2)
-    (0, 4):         Keycode.PAGE_UP,                         # Up → PgUp
-    (1, 4):         Keycode.PAGE_DOWN,                       # Down → PgDn
-    (2, 4):         (Keycode.SHIFT, Keycode.BACKSPACE),      # Right → Forward
-    (3, 4):         Keycode.BACKSPACE,                       # Left → Back
-
-    # Tab & window management
-    (0, 1):         (Keycode.CONTROL, Keycode.T),            # New Tab
-    (1, 2):         (Keycode.CONTROL, Keycode.W),            # Close Tab
-    (2, 3):         (Keycode.CONTROL, Keycode.SHIFT, Keycode.T),  # Reopen Closed Tab
-    (0, 2):         (Keycode.CONTROL, Keycode.N),            # New Window
-    (1, 3):         (Keycode.CONTROL, Keycode.SHIFT, Keycode.W),  # Close Window
-
-    # Page utilities
-    (0, 1, 4):      (Keycode.CONTROL, Keycode.R),            # Refresh
-    (1, 2, 4):      (Keycode.CONTROL, Keycode.SHIFT, Keycode.R),  # Hard Refresh
-    (2, 3, 4):      (Keycode.CONTROL, Keycode.L),            # Focus Address Bar
-    (0, 3):         (Keycode.CONTROL, Keycode.F),            # Find on Page
-    (0, 2, 3):      (Keycode.CONTROL, Keycode.H),            # History
-    (1, 2, 3):      (Keycode.CONTROL, Keycode.J),            # Download
-}
-
-# ────────────── Layer 6: macOS Media Keys ──────────────
-layer6_chords = {   # 6: macOS media keys
-    (0,):           ConsumerControlCode.BRIGHTNESS_DECREMENT,
-    (1,):           ConsumerControlCode.BRIGHTNESS_INCREMENT,
-    (2,):           ConsumerControlCode.VOLUME_DECREMENT,
-    (3,):           ConsumerControlCode.VOLUME_INCREMENT,
-    (0, 1):         ConsumerControlCode.MUTE,
-    (2, 3):         ConsumerControlCode.PLAY_PAUSE,
-    (0, 2):         ConsumerControlCode.SCAN_NEXT_TRACK,
-    (1, 3):         ConsumerControlCode.SCAN_PREVIOUS_TRACK,
-    (0, 3):         ConsumerControlCode.FAST_FORWARD,
-    (1, 2):         ConsumerControlCode.REWIND,
-    (0, 1, 2):      ConsumerControlCode.STOP,
-    (0, 1, 3):      ConsumerControlCode.EJECT,
-}
-
 # ────────────── Layer 7: Mouse Actions ──────────────
 # Mouse move chords: chord → (dx, dy)
 mouse_move_chords = {
@@ -166,6 +125,22 @@ mouse_release_chords = {
 # Chord for acceleration (if you use one)
 ACCEL_CHORD = (1, 2, 3)
 
+# ────────────── Layer 6: macOS Media Keys ──────────────
+layer6_chords = {   # 6: macOS media keys
+    (0,):           ConsumerControlCode.BRIGHTNESS_DECREMENT,
+    (1,):           ConsumerControlCode.BRIGHTNESS_INCREMENT,
+    (2,):           ConsumerControlCode.VOLUME_DECREMENT,
+    (3,):           ConsumerControlCode.VOLUME_INCREMENT,
+    (0, 1):         ConsumerControlCode.MUTE,
+    (2, 3):         ConsumerControlCode.PLAY_PAUSE,
+    (0, 2):         ConsumerControlCode.SCAN_NEXT_TRACK,
+    (1, 3):         ConsumerControlCode.SCAN_PREVIOUS_TRACK,
+    (0, 3):         ConsumerControlCode.FAST_FORWARD,
+    (1, 2):         ConsumerControlCode.REWIND,
+    (0, 1, 2):      ConsumerControlCode.STOP,
+    (0, 1, 3):      ConsumerControlCode.EJECT,
+}
+
 # ────────────── Layer 8: (Duplicate of Layer 6 for completeness) ──────────────
 layer8_chords = {   # 8: function keys F1–F12
     (0,):           Keycode.F1,
@@ -188,9 +163,7 @@ layer_maps = {
     2: layer2_chords,
     3: layer3_chords,
     4: modifier_chords,
-    5: layer5_chords,
-    6: layer6_chords,
-    7: {   # Mouse layer bundle
+    5: {   # Mouse layer 
         "move":    mouse_move_chords,
         "button":  mouse_button_chords,
         "scroll":  mouse_scroll_chords,
@@ -198,5 +171,7 @@ layer_maps = {
         "release": mouse_release_chords,
         "accel":   ACCEL_CHORD,
     },
+    6: layer6_chords,
+    7: {},  # empty placeholder
     8: layer8_chords,
 }

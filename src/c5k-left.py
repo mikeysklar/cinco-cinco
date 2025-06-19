@@ -160,27 +160,19 @@ def check_chords():
     # Grab this layer’s mapping
     lm = chords_config.layer_maps[layer]
 
-    # ─── 3) Layer-5: Navigation with repeat throttle ───────────────────
-    if layer == 5 and pending_combo in lm:
-        if pending_combo != held_nav_combo or (now - last_nav) >= NAV_REPEAT_MS:
-            kc = lm[pending_combo]
-            keyboard.press(kc)
-            keyboard.release_all()
-            held_nav_combo = pending_combo
-            last_nav       = now
-            sent_release   = True
+    # ─── 6) Layer-4 SCAG “arm” ──────────────────────────────────────────
+    if layer == 4 and not modifier_armed and pending_combo in chords_config.modifier_chords:
+        held_modifier   = chords_config.modifier_chords[pending_combo]
+        modifier_armed  = True
+        scag_skip_combo = pending_combo
+        skip_scag       = True
+        print(f"→ modifier armed: {held_modifier}")
+        pending_combo = None
+        last_combo    = ()
         return
 
-    # ─── 4) Layer-6: macOS media keys ─────────────────────────────────
-    if layer == 6 and pending_combo in lm:
-        print(f"→ media L6 combo {pending_combo} → {lm[pending_combo]!r}")
-        cc.send(lm[pending_combo])
-        sent_release = True
-        time.sleep(DEBOUNCE_UP)
-        return
-
-    # ─── 5) Layer-7: Mouse (move, click, scroll, hold/release) ─────────
-    if layer == 7:
+    # ─── 5) Layer-5: Mouse (move, click, scroll, hold/release) ─────────
+    if layer == 5:
         accel_active = (pending_combo == chords_config.ACCEL_CHORD)
 
         # buttons
@@ -232,15 +224,12 @@ def check_chords():
             sent_release = True
             return
 
-    # ─── 6) Layer-4 SCAG “arm” ──────────────────────────────────────────
-    if layer == 4 and not modifier_armed and pending_combo in chords_config.modifier_chords:
-        held_modifier   = chords_config.modifier_chords[pending_combo]
-        modifier_armed  = True
-        scag_skip_combo = pending_combo
-        skip_scag       = True
-        print(f"→ modifier armed: {held_modifier}")
-        pending_combo = None
-        last_combo    = ()
+    # ─── 4) Layer-6: macOS media keys ─────────────────────────────────
+    if layer == 6 and pending_combo in lm:
+        print(f"→ media L6 combo {pending_combo} → {lm[pending_combo]!r}")
+        cc.send(lm[pending_combo])
+        sent_release = True
+        time.sleep(DEBOUNCE_UP)
         return
 
     # ─── 7) First-release send for layers 1–4,6,8 ───────────────────────
