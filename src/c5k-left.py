@@ -69,6 +69,9 @@ last_nav         = 0.0
 last_pending_combo = None
 last_layer_change = 0.0
 skip_layer_lock = False
+held_scroll_combo = ()
+last_scroll       = 0.0
+SCROLL_REPEAT_MS  = 0.15   # or whatever interval you like
 
 # ─── Mouse chords for layer-7 (no thumb) ─────────────────────────────
 MOVE_DELTA = 5
@@ -82,7 +85,7 @@ def check_chords():
     global last_combo, pending_combo, sent_release, skip_scag, scag_skip_combo
     global modifier_armed, held_modifier, last_time, last_repeat, accel_active
     global held_nav_combo, last_nav, held_combo, last_pending_combo, last_layer_change
-    global skip_layer_lock
+    global skip_layer_lock, held_scroll_combo, last_scroll
 
     now = time.monotonic()
     # Read all 5 pins (0–3 fingers, 4 thumb)
@@ -145,7 +148,6 @@ def check_chords():
         modifier_armed  = True
         scag_skip_combo = pending_combo
         skip_scag       = True
-        print(f"→ modifier armed: {held_modifier}")
         pending_combo = None
         last_combo    = ()
         return
@@ -156,29 +158,39 @@ def check_chords():
 
         # BUTTON CLICK
         if pending_combo in chords_config.mouse_button_chords and pending_changed:
-            print(f"[L5] Click {pending_combo} → {chords_config.mouse_button_chords[pending_combo]}")
             mouse.click(chords_config.mouse_button_chords[pending_combo])
             held_combo   = ()
             sent_release = True
             time.sleep(DEBOUNCE_UP)
             return
 
-        # SCROLL
+        # ─── SCROLL (initial & arm for repeat) ─────────────────────────────
         if pending_combo in chords_config.mouse_scroll_chords and pending_changed:
             amt = chords_config.mouse_scroll_chords[pending_combo]
-            print(f"[L5] Scroll {pending_combo} → {amt}{' (accel)' if accel_active else ''}")
             if accel_active:
                 amt *= ACCEL_MULTIPLIER
             mouse.move(wheel=amt)
-            held_combo   = ()
-            sent_release = True
-            time.sleep(DEBOUNCE_UP)
+            held_scroll_combo = pending_combo
+            last_scroll       = now
+            sent_release      = True
+            return
+
+        # ─── SCROLL REPEAT ─────────────────────────────────────────────────
+        if (
+            pending_combo == held_scroll_combo
+            and pending_combo in chords_config.mouse_scroll_chords
+            and (now - last_scroll) >= SCROLL_REPEAT_MS
+        ):
+            amt = chords_config.mouse_scroll_chords[pending_combo]
+            if accel_active:
+                amt *= ACCEL_MULTIPLIER
+            mouse.move(wheel=amt)
+            last_scroll = now
             return
 
         # MOVE (initial)
         if pending_combo in chords_config.mouse_move_chords and pending_changed:
             dx, dy = chords_config.mouse_move_chords[pending_combo]
-            print(f"[L5] Move start {pending_combo} → ({dx},{dy}){' accel' if accel_active else ''}")
             if accel_active:
                 dx *= ACCEL_MULTIPLIER
                 dy *= ACCEL_MULTIPLIER
@@ -193,7 +205,6 @@ def check_chords():
            and pending_combo in chords_config.mouse_move_chords \
            and (now - last_repeat) >= L5_REPEAT_MS:
             dx, dy = chords_config.mouse_move_chords[held_combo]
-            print(f"[L5] Move repeat {held_combo} dt={(now-last_repeat):.3f}")
             if accel_active:
                 dx *= ACCEL_MULTIPLIER
                 dy *= ACCEL_MULTIPLIER
@@ -203,7 +214,6 @@ def check_chords():
 
         # HOLD
         if pending_combo in chords_config.mouse_hold_chords and pending_changed:
-            print(f"[L5] Hold {pending_combo} → {chords_config.mouse_hold_chords[pending_combo]}")
             mouse.press(chords_config.mouse_hold_chords[pending_combo])
             held_combo   = ()
             sent_release = True
@@ -211,19 +221,27 @@ def check_chords():
 
         # RELEASE
         if pending_combo in chords_config.mouse_release_chords and pending_changed:
-            print(f"[L5] Release {pending_combo} → {chords_config.mouse_release_chords[pending_combo]}")
             mouse.release(chords_config.mouse_release_chords[pending_combo])
             held_combo   = ()
             sent_release = True
             return
 
     # ───  macOS media keys ─────────────────────────────────
-    if layer == 6 and pending_combo in lm:
-        print(f"→ media L6 combo {pending_combo} → {lm[pending_combo]!r}")
-        cc.send(lm[pending_combo])
-        sent_release = True
-        time.sleep(DEBOUNCE_UP)
-        return
+        # ─── Layer 6: macOS media keys (with debug) ─────────────────────────
+        if layer == 6:
+            # log every pass through L6
+            print(f"[DEBUG] L6 enter: pending={pending_combo}, last={last_combo}, keys={list(lm.keys())}")
+            if pending_combo in lm:
+                code = lm[pending_combo]
+                print(f"[DEBUG]  Media trigger: combo={pending_combo} → {code!r}")
+                try:
+                    cc.send(code)
+                    print(f"[DEBUG]  Media sent OK")
+                except Exception as e:
+                    print(f"[DEBUG]  Media send ERROR: {e}")
+                sent_release = True
+                time.sleep(DEBOUNCE_UP)
+                return
 
     # ─── First-release send for layers 1–3,6-7 ───────────────────────
     if len(combo) < len(last_combo) and last_combo and not sent_release:
@@ -238,7 +256,6 @@ def check_chords():
                 key = chords_config.alpha[last_combo]
                 keyboard.press(held_modifier, key)
                 keyboard.release_all()
-                print(f"→ sent {held_modifier}+{key}")
                 layer       = 1
                 thumb_taps  = 1
                 modifier_armed = False

@@ -215,9 +215,9 @@ Each layer uses unique key combinations (chords) from the 5 keys (positions 0–
 | MOVE LEFT      |  X  |     |     |     |  X  | (3, 4)       |
 | SCROLL UP      |     |     |  X  |  X  |  X  | (0, 1, 4)    |
 | SCROLL DOWN    |  X  |  X  |     |     |  X  | (2, 3, 4)    |
-| LEFT CLICK     |     |     |  X  |  X  |     | (0, 1)       |
-| RIGHT CLICK    |     |  X  |  X  |     |     | (1, 2)       |
-| MIDDLE CLICK   |  X  |  X  |     |     |     | (2, 3)       |
+| LEFT CLICK     |  X  |  X  |     |     |     | (3, 2)       |
+| RIGHT CLICK    |     |     |  X  |  X  |     | (0, 1)       |
+| MIDDLE CLICK   |     |     |  X  |     |     | (1, 1)       |
 | FORWARD CLICK  |  X  |     |     |  X  |     | (0, 3)       |
 | HOLD LEFT      |     |  X  |  X  |  X  |     | (0, 1, 2)    |
 | RELEASE LEFT   |  X  |     |  X  |  X  |     | (0, 1, 3)    |
