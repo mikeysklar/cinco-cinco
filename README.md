@@ -152,67 +152,108 @@ Each layer uses unique key combinations (chords) from the 5 keys (positions 0–
     
 ## Layer 2: Numbers and Arrows 
 
-| Key         | Pky | Rng | Mid | Idx | Thm | Chord         |
-|-------------|:---:|:---:|:---:|:---:|:---:|---------------|
-| 1           |     |     |     |  x  |     | (0,)          |
-| 2           |     |     |  x  |     |     | (1,)          |
-| 3           |     |  x  |     |     |     | (2,)          |
-| 4           |  x  |     |     |     |     | (3,)          |
-| 5           |     |     |  x  |  x  |     | (0,1)         |
-| 6           |     |  x  |  x  |     |     | (1,2)         |
-| 7           |  x  |  x  |     |     |     | (2,3)         |
-| 8           |     |  x  |     |  x  |     | (0,2)         |
-| 9           |  x  |     |  x  |     |     | (1,3)         |
-| 0           |     |  x  |  x  |  x  |     | (0,1,2)       |
-| ↑ (Up)      |  x  |     |     |  x  |     | (0,3)         |
-| ↓ (Down)    |  x  |  x  |  x  |     |     | (1,2,3)       |
-| → (Right)   |  x  |     |  x  |  x  |     | (0,1,3)       |
-| ← (Left)    |  x  |  x  |     |  x  |     | (0,2,3)       |
+| Action      | Pky | Rng | Mid | Idx | Thm | Chord           |
+|-------------|:---:|:---:|:---:|:---:|:---:|-----------------|
+| ONE         |     |     |     |  X  |     | (0,)            |
+| TWO         |     |     |  X  |     |     | (1,)            |
+| THREE       |     |  X  |     |     |     | (2,)            |
+| FOUR        |  X  |     |     |     |     | (3,)            |
+| FIVE        |     |     |  X  |  X  |     | (0, 1)          |
+| SIX         |     |  X  |  X  |     |     | (1, 2)          |
+| SEVEN       |  X  |  X  |     |     |     | (2, 3)          |
+| EIGHT       |     |  X  |     |  X  |     | (0, 2)          |
+| NINE        |  X  |     |  X  |     |     | (1, 3)          |
+| ZERO        |     |  X  |  X  |  X  |     | (0, 1, 2)       |
+| UP_ARROW    |     |     |     |  X  |  X  | (0, 4)          |
+| DOWN_ARROW  |     |     |  X  |     |  X  | (1, 4)          |
+| RIGHT_ARROW |     |  X  |     |     |  X  | (2, 4)          |
+| LEFT_ARROW  |  X  |     |     |     |  X  | (3, 4)          |
+| PAGE_UP     |     |     |  X  |  X  |  X  | (0, 1, 4)       |
+| PAGE_DOWN   |  X  |  X  |     |     |  X  | (2, 3, 4)       |
+| END         |     |  X  |  X  |  X  |  X  | (0, 1, 2, 4)    |
+| DELETE      |     |  X  |     |  X  |  X  | (0, 2, 4)       |
+| INSERT      |  X  |     |  X  |     |  X  | (1, 3, 4)       |
+| HOME        |  X  |  X  |  X  |     |  X  | (1, 2, 3, 4)    |
 
 ## Layer 3: Whitespace & Delimiters
 
-| Key            | Pky | Rng | Mid | Idx | Thm | Chord         |
-|----------------|:---:|:---:|:---:|:---:|:---:|---------------|
-| ESCAPE         |     |     |     |  x  |     | (0,)          |
-| TAB            |     |     |  x  |     |     | (1,)          |
-| PERIOD (.)     |     |  x  |     |     |     | (2,)          |
-| MINUS (-)      |  x  |     |     |     |     | (3,)          |
-| FORWARD_SLASH  |  x  |  x  |     |     |     | (2,3)         |
-| ENTER          |     |     |  x  |  x  |     | (0,1)         |
-| COMMA (,)      |     |  x  |     |  x  |     | (0,2)         |
-| LEFT_BRACKET   |  x  |     |  x  |     |     | (1,3)         |
-| RIGHT_BRACKET  |  x  |     |     |  x  |     | (0,3)         |
-| BACKSLASH (\\) |  x  |  x  |  x  |     |     | (1,2,3)       |
-| BACKSPACE      |     |  x  |  x  |     |     | (1,2)         |
-| QUOTE (')      |  x  |     |  x  |  x  |     | (0,1,3)       |
-| SEMICOLON (;)  |  x  |  x  |     |  x  |     | (0,2,3)       |
-| GRAVE (`)      |  x  |  x  |  x  |  x  |     | (0,1,2,3)     |
-| DELETE         |  x  |  x  |  x  |     |     | (0,1,2)       |
+| Action         | Pky | Rng | Mid | Idx | Thm | Chord         |
+| -------------- | :-: | :-: | :-: | :-: | :-: | ------------- |
+| ESCAPE         |     |     |     |  X  |     | (0,)          |
+| TAB            |     |     |  X  |     |     | (1,)          |
+| PERIOD         |     |  X  |     |     |     | (2,)          |
+| MINUS          |  X  |     |     |     |     | (3,)          |
+| FORWARD_SLASH  |  X  |  X  |     |     |     | (2, 3)        |
+| ENTER          |     |     |  X  |  X  |     | (0, 1)        |
+| COMMA          |     |  X  |     |  X  |     | (0, 2)        |
+| LEFT_BRACKET   |  X  |     |  X  |     |     | (1, 3)        |
+| RIGHT_BRACKET  |  X  |     |     |  X  |     | (0, 3)        |
+| BACKSLASH      |  X  |  X  |  X  |     |     | (1, 2, 3)     |
+| BACKSPACE      |     |  X  |  X  |     |     | (1, 2)        |
+| QUOTE          |  X  |     |  X  |  X  |     | (0, 1, 3)     |
+| SEMICOLON      |  X  |  X  |     |  X  |     | (0, 2, 3)     |
+| GRAVE_ACCENT   |  X  |  X  |  X  |  X  |     | (0, 1, 2, 3)  |
+| DELETE         |     |  X  |  X  |  X  |     | (0, 1, 2)     |
 
 ## Layer 4: Modifiers & Navigation (SCAG)
 
-| Key     | Pky | Rng | Mid | Idx | Thm | Chord     |
-|---------|:---:|:---:|:---:|:---:|:---:|-----------|
-| SHIFT   |  x  |     |     |     |     | (3,)      |
-| CTRL    |     |  x  |     |     |     | (2,)      |
-| ALT     |     |     |  x  |     |     | (1,)      |
-| GUI     |     |     |     |  x  |     | (0,)      |
+| Action         | Pky | Rng | Mid | Idx | Thm | Chord   |
+| -------------- | :-: | :-: | :-: | :-: | :-: | ------- |
+| LEFT_SHIFT     |  X  |     |     |     |     | (3,)    |
+| LEFT_CONTROL   |     |  X  |     |     |     | (2,)    |
+| LEFT_ALT       |     |     |  X  |     |     | (1,)    |
+| LEFT_GUI       |     |     |     |  X  |     | (0,)    |
+| RIGHT_ALT (⌥)  |     |     |  X  |  X  |     | (0, 1)  |
 
 ## Layer 5: Mouse Control (Movement, Scroll, Buttons)
 
-| Action           | Pky | Rng | Mid | Idx | Thm | Chord      |
-|------------------|:---:|:---:|:---:|:---:|:---:|------------|
-| MOVE RIGHT       |     |     |     |  x  |     | (0,)       |
-| MOVE LEFT        |     |     |  x  |     |     | (1,)       |
-| MOVE UP          |     |  x  |     |     |     | (2,)       |
-| MOVE DOWN        |  x  |     |     |     |     | (3,)       |
-| SCROLL UP        |  x  |  x  |     |     |     | (2,3)      |
-| SCROLL DOWN      |  x  |  x  |     |  x  |     | (0,2,3)    |
-| LEFT CLICK       |     |     |  x  |  x  |     | (0,1)      |
-| RIGHT CLICK      |     |  x  |     |  x  |     | (0,2)      |
-| MIDDLE CLICK     |     |  x  |  x  |     |     | (1,2)      |
-| BACK BUTTON      |  x  |     |     |  x  |     | (0,3)      |
-| FORWARD BUTTON   |  x  |     |  x  |     |     | (1,3)      |
-| HOLD LEFT        |     |  x  |  x  |  x  |     | (0,1,2)    |
-| RELEASE LEFT     |  x  |     |  x  |  x  |     | (0,1,3)    |
-| ACCELERATE       |  x  |  x  |  x  |     |     | (1,2,3)    |
+| Action         | Pky | Rng | Mid | Idx | Thm | Chord        |
+| -------------- | :-: | :-: | :-: | :-: | :-: | ------------ |
+| MOVE UP        |     |     |     |  X  |  X  | (0, 4)       |
+| MOVE DOWN      |     |     |  X  |     |  X  | (1, 4)       |
+| MOVE RIGHT     |     |  X  |     |     |  X  | (2, 4)       |
+| MOVE LEFT      |  X  |     |     |     |  X  | (3, 4)       |
+| SCROLL UP      |     |     |  X  |  X  |  X  | (0, 1, 4)    |
+| SCROLL DOWN    |  X  |  X  |     |     |  X  | (2, 3, 4)    |
+| LEFT CLICK     |     |     |  X  |  X  |     | (0, 1)       |
+| RIGHT CLICK    |     |  X  |  X  |     |     | (1, 2)       |
+| MIDDLE CLICK   |  X  |  X  |     |     |     | (2, 3)       |
+| FORWARD CLICK  |  X  |     |     |  X  |     | (0, 3)       |
+| HOLD LEFT      |     |  X  |  X  |  X  |     | (0, 1, 2)    |
+| RELEASE LEFT   |  X  |     |  X  |  X  |     | (0, 1, 3)    |
+| ACCELERATE     |  X  |  X  |  X  |     |     | (1, 2, 3)    |
+
+## Layer 6: Media
+
+| Action               | Pky | Rng | Mid | Idx | Thm | Chord        |
+| -------------------- | :-: | :-: | :-: | :-: | :-: | ------------ |
+| BRIGHTNESS_DECREMENT |     |     |     |  X  |     | (0,)         |
+| BRIGHTNESS_INCREMENT |     |     |  X  |     |     | (1,)         |
+| VOLUME_DECREMENT     |     |  X  |     |     |     | (2,)         |
+| VOLUME_INCREMENT     |  X  |     |     |     |     | (3,)         |
+| MUTE                 |     |     |  X  |  X  |     | (0, 1)       |
+| PLAY_PAUSE           |  X  |  X  |     |     |     | (2, 3)       |
+| SCAN_NEXT_TRACK      |     |  X  |     |  X  |     | (0, 2)       |
+| SCAN_PREVIOUS_TRACK  |  X  |     |  X  |     |     | (1, 3)       |
+| FAST_FORWARD         |  X  |     |     |  X  |     | (0, 3)       |
+| REWIND               |     |  X  |  X  |     |     | (1, 2)       |
+| STOP                 |     |  X  |  X  |  X  |     | (0, 1, 2)    |
+| EJECT                |  X  |     |  X  |  X  |     | (0, 1, 3)    |
+
+## Layer 7: F1 - F12
+
+| Action | Pky | Rng | Mid | Idx | Thm | Chord        |
+| ------ | :-: | :-: | :-: | :-: | :-: | ------------ |
+| F1     |     |     |     |  X  |     | (0,)         |
+| F2     |     |     |  X  |     |     | (1,)         |
+| F3     |     |  X  |     |     |     | (2,)         |
+| F4     |  X  |     |     |     |     | (3,)         |
+| F5     |     |     |  X  |  X  |     | (0, 1)       |
+| F6     |     |  X  |  X  |     |     | (1, 2)       |
+| F7     |  X  |  X  |     |     |     | (2, 3)       |
+| F8     |     |  X  |     |  X  |     | (0, 2)       |
+| F9     |  X  |     |  X  |     |     | (1, 3)       |
+| F10    |     |  X  |  X  |  X  |     | (0, 1, 2)    |
+| F11    |  X  |  X  |  X  |     |     | (1, 2, 3)    |
+| F12    |  X  |  X  |     |  X  |     | (0, 2, 3)    |
+

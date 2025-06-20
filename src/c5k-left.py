@@ -70,27 +70,6 @@ last_pending_combo = None
 last_layer_change = 0.0
 skip_layer_lock = False
 
-# ─── Chord maps ──────────────────────────────
-
-def get_chord_mapping(layer):
-    return {
-        1: layer1_chords,
-        2: layer2_chords,
-        3: layer3_chords,
-        4: modifier_chords,
-        5: layer5_chords,
-        6: layer6_chords,
-        7: {  # Mouse
-            "move": mouse_move_chords,
-            "button": mouse_button_chords,
-            "scroll": mouse_scroll_chords,
-            "hold": mouse_hold_chords,
-            "release": mouse_release_chords,
-            "accel": ACCEL_CHORD,
-        },
-        8: layer8_chords,
-    }[layer]
-
 # ─── Mouse chords for layer-7 (no thumb) ─────────────────────────────
 MOVE_DELTA = 5
 ACCEL_MULTIPLIER = 2
@@ -139,7 +118,7 @@ def check_chords():
         else:
             thumb_taps = 1
         last_tap_time = now
-        layer = min(thumb_taps, 8)
+        layer = min(thumb_taps, 7)
         print(f"→ locked to layer-{layer}")
 
         # reset combo state
@@ -160,9 +139,9 @@ def check_chords():
     # Grab this layer’s mapping
     lm = chords_config.layer_maps[layer]
 
-    # ─── 6) Layer-4 SCAG “arm” ──────────────────────────────────────────
-    if layer == 4 and not modifier_armed and pending_combo in chords_config.modifier_chords:
-        held_modifier   = chords_config.modifier_chords[pending_combo]
+    # ─── Layer-4 SCAG “arm” ──────────────────────────────────────────
+    if layer == 4 and not modifier_armed and pending_combo in chords_config.scag:
+        held_modifier   = chords_config.scag[pending_combo]
         modifier_armed  = True
         scag_skip_combo = pending_combo
         skip_scag       = True
@@ -171,42 +150,50 @@ def check_chords():
         last_combo    = ()
         return
 
-    # ─── 5) Layer-5: Mouse (move, click, scroll, hold/release) ─────────
+    # ─── Layer-5: Mouse with event-only debug ───────────────────────────
     if layer == 5:
         accel_active = (pending_combo == chords_config.ACCEL_CHORD)
 
-        # buttons
-        if pending_combo in chords_config.mouse_button_chords:
+        # BUTTON CLICK
+        if pending_combo in chords_config.mouse_button_chords and pending_changed:
+            print(f"[L5] Click {pending_combo} → {chords_config.mouse_button_chords[pending_combo]}")
             mouse.click(chords_config.mouse_button_chords[pending_combo])
+            held_combo   = ()
             sent_release = True
             time.sleep(DEBOUNCE_UP)
             return
 
-        # scroll
-        if pending_combo in chords_config.mouse_scroll_chords:
+        # SCROLL
+        if pending_combo in chords_config.mouse_scroll_chords and pending_changed:
             amt = chords_config.mouse_scroll_chords[pending_combo]
+            print(f"[L5] Scroll {pending_combo} → {amt}{' (accel)' if accel_active else ''}")
             if accel_active:
                 amt *= ACCEL_MULTIPLIER
             mouse.move(wheel=amt)
+            held_combo   = ()
             sent_release = True
             time.sleep(DEBOUNCE_UP)
             return
 
-        # move
-        if pending_combo in chords_config.mouse_move_chords:
+        # MOVE (initial)
+        if pending_combo in chords_config.mouse_move_chords and pending_changed:
             dx, dy = chords_config.mouse_move_chords[pending_combo]
+            print(f"[L5] Move start {pending_combo} → ({dx},{dy}){' accel' if accel_active else ''}")
             if accel_active:
                 dx *= ACCEL_MULTIPLIER
                 dy *= ACCEL_MULTIPLIER
             mouse.move(dx, dy)
-            held_combo  = pending_combo
-            last_repeat = now
+            held_combo   = pending_combo
+            last_repeat  = now
             sent_release = True
             return
 
-        # repeat move
-        if pending_combo == held_combo and (now - last_repeat) >= L5_REPEAT_MS:
+        # MOVE REPEAT
+        if pending_combo == held_combo \
+           and pending_combo in chords_config.mouse_move_chords \
+           and (now - last_repeat) >= L5_REPEAT_MS:
             dx, dy = chords_config.mouse_move_chords[held_combo]
+            print(f"[L5] Move repeat {held_combo} dt={(now-last_repeat):.3f}")
             if accel_active:
                 dx *= ACCEL_MULTIPLIER
                 dy *= ACCEL_MULTIPLIER
@@ -214,17 +201,23 @@ def check_chords():
             last_repeat = now
             return
 
-        # hold & release
-        if pending_combo in chords_config.mouse_hold_chords:
+        # HOLD
+        if pending_combo in chords_config.mouse_hold_chords and pending_changed:
+            print(f"[L5] Hold {pending_combo} → {chords_config.mouse_hold_chords[pending_combo]}")
             mouse.press(chords_config.mouse_hold_chords[pending_combo])
-            sent_release = True
-            return
-        if pending_combo in chords_config.mouse_release_chords:
-            mouse.release(chords_config.mouse_release_chords[pending_combo])
+            held_combo   = ()
             sent_release = True
             return
 
-    # ─── 4) Layer-6: macOS media keys ─────────────────────────────────
+        # RELEASE
+        if pending_combo in chords_config.mouse_release_chords and pending_changed:
+            print(f"[L5] Release {pending_combo} → {chords_config.mouse_release_chords[pending_combo]}")
+            mouse.release(chords_config.mouse_release_chords[pending_combo])
+            held_combo   = ()
+            sent_release = True
+            return
+
+    # ───  macOS media keys ─────────────────────────────────
     if layer == 6 and pending_combo in lm:
         print(f"→ media L6 combo {pending_combo} → {lm[pending_combo]!r}")
         cc.send(lm[pending_combo])
@@ -232,7 +225,7 @@ def check_chords():
         time.sleep(DEBOUNCE_UP)
         return
 
-    # ─── 7) First-release send for layers 1–4,6,8 ───────────────────────
+    # ─── First-release send for layers 1–3,6-7 ───────────────────────
     if len(combo) < len(last_combo) and last_combo and not sent_release:
         # skip SCAG if it’s the skip combo
         if skip_scag and last_combo == scag_skip_combo:
@@ -241,8 +234,8 @@ def check_chords():
             skip_layer_lock = True
             use = pending_combo or last_combo
             # SCAG send (layer-4)
-            if layer == 4 and modifier_armed and last_combo in chords_config.layer1_chords:
-                key = chords_config.layer1_chords[last_combo]
+            if layer == 4 and modifier_armed and last_combo in chords_config.alpha:
+                key = chords_config.alpha[last_combo]
                 keyboard.press(held_modifier, key)
                 keyboard.release_all()
                 print(f"→ sent {held_modifier}+{key}")
@@ -251,7 +244,7 @@ def check_chords():
                 modifier_armed = False
                 skip_scag      = False
             # normal layers
-            elif layer in (1, 2, 3, 6, 8):
+            elif layer in (1, 2, 3, 6, 7):
                 if use != (4,):  # ignore pure thumb
                     kc = lm.get(use)
                     if kc:

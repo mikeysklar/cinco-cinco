@@ -6,7 +6,7 @@ from adafruit_hid.consumer_control_code import ConsumerControlCode
 from adafruit_hid.mouse import Mouse
 
 # ────────────── Layer 1: Alpha ──────────────
-layer1_chords = {  # layer-1: alpha
+alpha = {  # layer-1: alpha
     (0,):           Keycode.E,
     (1,):           Keycode.I,
     (2,):           Keycode.A,
@@ -38,7 +38,7 @@ layer1_chords = {  # layer-1: alpha
 }
 
 # ────────────── Layer 2: Numbers & Arrows ──────────────
-layer2_chords = {  # layer-2: numbers & thumb-based arrows
+num_nav = {  # layer-2: numbers & thumb-based arrows
     # Numbers (unchanged)
     (0,):           Keycode.ONE,
     (1,):           Keycode.TWO,
@@ -67,7 +67,7 @@ layer2_chords = {  # layer-2: numbers & thumb-based arrows
 }
 
 # ────────────── Layer 3: Whitespace & Delimiters ──────────────
-layer3_chords = {  # layer-3: whitespace & delimiters
+space_delim = {  # layer-3: whitespace & delimiters
     (0,):           Keycode.ESCAPE,
     (1,):           Keycode.TAB,
     (2,):           Keycode.PERIOD,
@@ -86,7 +86,7 @@ layer3_chords = {  # layer-3: whitespace & delimiters
 }
 
 # ────────────── Layer 4: Modifiers ──────────────
-modifier_chords = {
+scag = {
     (3,):       Keycode.LEFT_SHIFT,
     (2,):       Keycode.LEFT_CONTROL,
     (1,):       Keycode.LEFT_ALT,
@@ -94,39 +94,43 @@ modifier_chords = {
     (0, 1):     Keycode.RIGHT_ALT,     # OPTION (⌥)
 }
 
-# ────────────── Layer 7: Mouse Actions ──────────────
-# Mouse move chords: chord → (dx, dy)
+# ────────────── Layer 5: Mouse Actions ──────────────
+
+# ─── Mouse move chords: thumb + one finger ───────────────────────────
 mouse_move_chords = {
-    (1, 3):   (-1,  0),  # Move Left
-    (1, 2):   ( 0,  1),  # Move Up
-    (2, 3):   ( 1,  0),  # Move Right
-    (0, 3):   ( 0, -1),  # Move Down
+    (0, 4): ( 0, -50),  # Up
+    (1, 4): ( 0,  50),  # Down
+    (2, 4): ( 50,  0),  # Right
+    (3, 4): (-50,  0),  # Left
 }
-# Mouse button chords: chord → Mouse button
+
+# ─── Mouse button chords: two fingers only ──────────────────────────
 mouse_button_chords = {
-    (0, 3):   Mouse.LEFT_BUTTON,
-    (1, 2):   Mouse.RIGHT_BUTTON,
-    (1, 3):   Mouse.MIDDLE_BUTTON,
-    (2, 3):   Mouse.FORWARD_BUTTON,
+    (3, 2): Mouse.LEFT_BUTTON,     # ← no thumb
+    (1, 1): Mouse.MIDDLE_BUTTON,
+    (0, 1): Mouse.RIGHT_BUTTON,
+    (0, 3): Mouse.FORWARD_BUTTON,
 }
-# Mouse scroll chords: chord → scroll direction
+
+# ─── Mouse scroll chords: two fingers + thumb ───────────────────────
 mouse_scroll_chords = {
-    (2, 3):      1,    # Scroll Up
-    (0, 2, 3):  -1,    # Scroll Down
+    (0, 1, 4):  50,   # Scroll Up
+    (2, 3, 4): -50,   # Scroll Down
 }
-# Mouse hold chords: chord → Mouse button
+
+# ─── Mouse hold/release chords (three fingers) ─────────────────────
 mouse_hold_chords = {
-    (0, 1, 2): Mouse.LEFT_BUTTON,  # Hold Left Button
+    (0, 1, 2): Mouse.LEFT_BUTTON,   # press & hold
 }
-# Mouse release chords: chord → Mouse button
 mouse_release_chords = {
-    (0, 1, 3): Mouse.LEFT_BUTTON,  # Release Left Button
+    (0, 1, 3): Mouse.LEFT_BUTTON,   # release
 }
-# Chord for acceleration (if you use one)
+
+# ─── Acceleration chord (three fingers) ─────────────────────────────
 ACCEL_CHORD = (1, 2, 3)
 
 # ────────────── Layer 6: macOS Media Keys ──────────────
-layer6_chords = {   # 6: macOS media keys
+media = {   # 6: macOS media keys
     (0,):           ConsumerControlCode.BRIGHTNESS_DECREMENT,
     (1,):           ConsumerControlCode.BRIGHTNESS_INCREMENT,
     (2,):           ConsumerControlCode.VOLUME_DECREMENT,
@@ -141,29 +145,29 @@ layer6_chords = {   # 6: macOS media keys
     (0, 1, 3):      ConsumerControlCode.EJECT,
 }
 
-# ────────────── Layer 8: (Duplicate of Layer 6 for completeness) ──────────────
-layer8_chords = {   # 8: function keys F1–F12
-    (0,):           Keycode.F1,
-    (1,):           Keycode.F2,
-    (2,):           Keycode.F3,
-    (3,):           Keycode.F4,
-    (0, 1):         Keycode.F5,
-    (0, 2):         Keycode.F6,
-    (0, 3):         Keycode.F7,
-    (1, 2):         Keycode.F8,
-    (1, 3):         Keycode.F9,
-    (2, 3):         Keycode.F10,
-    (0, 1, 2):      Keycode.F11,
-    (0, 1, 3):      Keycode.F12,
+# Layer 7: Function keys F1–F12, mapped to the same chord order as 1–0 digits
+function = {
+    (0,):        Keycode.F1,   # 1 → F1
+    (1,):        Keycode.F2,   # 2 → F2
+    (2,):        Keycode.F3,   # 3 → F3
+    (3,):        Keycode.F4,   # 4 → F4
+    (0, 1):      Keycode.F5,   # 5 → F5
+    (1, 2):      Keycode.F6,   # 6 → F6
+    (2, 3):      Keycode.F7,   # 7 → F7
+    (0, 2):      Keycode.F8,   # 8 → F8
+    (1, 3):      Keycode.F9,   # 9 → F9
+    (0, 1, 2):   Keycode.F10,  # 0 → F10
+    (1, 2, 3):   Keycode.F11,  # next free 3-finger combo → F11
+    (0, 2, 3):   Keycode.F12,  # following 3-finger combo → F12
 }
 
 # ────────────── Central Layer Map ──────────────
 layer_maps = {
-    1: layer1_chords,
-    2: layer2_chords,
-    3: layer3_chords,
-    4: modifier_chords,
-    5: {   # Mouse layer 
+    1: alpha,                                   # letters
+    2: num_nav,                                 # numbers / navigation
+    3: space_delim,                             # spaces / delimeters
+    4: scag,
+    5: {   # Mouse 
         "move":    mouse_move_chords,
         "button":  mouse_button_chords,
         "scroll":  mouse_scroll_chords,
@@ -171,7 +175,7 @@ layer_maps = {
         "release": mouse_release_chords,
         "accel":   ACCEL_CHORD,
     },
-    6: layer6_chords,
-    7: {},  # empty placeholder
-    8: layer8_chords,
+    6: media,                                   # macOS media keys
+    7: function,                                # F1 - F12
 }
+
