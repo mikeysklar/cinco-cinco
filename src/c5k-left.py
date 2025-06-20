@@ -13,6 +13,8 @@ from adafruit_hid.consumer_control import ConsumerControl
 from adafruit_hid.consumer_control_code import ConsumerControlCode
 import chords_config
 
+DEBUG_L6 = True
+
 # ─── Hardware setup ────────────────────────────────────────────────────
 vcc = digitalio.DigitalInOut(board.VCC_OFF)
 vcc.direction = digitalio.Direction.OUTPUT
@@ -227,21 +229,14 @@ def check_chords():
             return
 
     # ───  macOS media keys ─────────────────────────────────
-        # ─── Layer 6: macOS media keys (with debug) ─────────────────────────
-        if layer == 6:
-            # log every pass through L6
-            print(f"[DEBUG] L6 enter: pending={pending_combo}, last={last_combo}, keys={list(lm.keys())}")
-            if pending_combo in lm:
-                code = lm[pending_combo]
-                print(f"[DEBUG]  Media trigger: combo={pending_combo} → {code!r}")
-                try:
-                    cc.send(code)
-                    print(f"[DEBUG]  Media sent OK")
-                except Exception as e:
-                    print(f"[DEBUG]  Media send ERROR: {e}")
-                sent_release = True
-                time.sleep(DEBOUNCE_UP)
-                return
+    if layer == 6:
+        # fire on raw “rising edge” of a valid media chord
+        if combo and combo != last_combo and combo in lm:
+            code = lm[combo]
+            cc.send(code)
+            sent_release = True
+            time.sleep(DEBOUNCE_UP)
+        return
 
     # ─── First-release send for layers 1–3,6-7 ───────────────────────
     if len(combo) < len(last_combo) and last_combo and not sent_release:
