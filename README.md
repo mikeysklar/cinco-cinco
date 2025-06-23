@@ -1,33 +1,26 @@
 # Cinco-Cinco
 *A 5-Key Chording Keyboard with Layered Input and BLE Support*
 
-Cinco-Cinco is a wireless, low-profile chording keyboard that uses just **five keys** to emulate a full keyboard. By combining keypresses into chords and utilizing **five software layers**, Cinco-Cinco enables efficient one-handed typing.  I had been building 7-key chording keyboards, but that reuires the hand to lose its home position and travel. Five keys and layers not only allows for all keys, but also all total control. It is a lot of fun to use.
+Cinco-Cinco is a wireless BLE, low-profile chording keyboard that uses just **five keys** to emulate a full keyboard. By combining keypresses into chords and utilizing **seven layers**, Cinco-Cinco enables efficient one-handed typing.  
+
+I have spent the last year building pocket keybaords. My [BUBBY](https://github.com/mikeysklar/bubby) is a daily carry which I use for todos, lists and reminders. It made me enjoy typing with one hand to the point that I wanted a desktop version which has become the cinco-cinco. 
 
 ## Table of Contents
-- [Features](#features)
 - [Why Chording?](#why-chording)
 - [Hardware Highlights](#hardware-highlights)
-- [Design Files & Software Versions](#design-files--software-versions)
 - [CircuitPython Compatibility](#circuitpython-compatibility)
+- [Design Files & Software Versions](#design-files--software-versions)
 - [Layer Maps](#layer-maps)
   - [Layer 1: Letters](#layer-1-letters)
   - [Layer 2: Numbers](#layer-2-numbers)
   - [Layer 3: Whitespace & Delimiters](#layer-3-whitespace--delimiters)
   - [Layer 4: Modifiers & Navigation](#layer-4-modifiers--navigation)
   - [Layer 5: Mouse Control / Media](#layer-5-mouse-control--media)
-- [Typing Speed & Ergonomics](#typing-speed--ergonomics)
+  - [Layer 6: Media](#layer-6-media)
+  - [Layer 7: F1 - F12](#layer-7-F1---F12)
+- [Typing Speed](#typing-speed)
+- [BOM](#bill-of-materials)
 - [License](#license)
-
----
-
-## Features
-
-- **5-Key Chording Input** – Access a complete keyboard using just 5 keys across multiple layers
-- **Wireless BLE Support** – Includes a CircuitPython BLE HID example for wireless connectivity
-- **Compact, Flat Design** – Ideal for one-handed, mobile, or embedded use
-- **No Finger Travel** – All inputs stay under your fingertips to reduce movement and increase speed
-- **STEMMA QT I2C Port** – Compatible with a variety of microcontrollers and displays
-- **Single PCB, No Wiring** – Low-profile switches soldered directly to the board for minimal complexity
 
 ---
 
@@ -35,7 +28,7 @@ Cinco-Cinco is a wireless, low-profile chording keyboard that uses just **five k
 
 Computing is rapidly changing. We are moving away from sitting at desks and staring at screens. Smart glasses and watches let us consume information on the go. Phones, which have taken too much of our attention, no longer need to be our primary method of communication.
 
-**The key is the keys.**
+**The keys are key**
 
 With Cinco-Cinco, we take advantage of our five fingers to create a new kind of keyboard — one that allows you to input text **without finger travel**, without looking, and in some cases **without even needing your hands**.
 
@@ -45,10 +38,30 @@ Chording opens up a future of input that is compact, discreet, and mobile. This 
 
 ## Hardware Highlights
 
-- **I2C STEMMA QT connector** for plug-and-play support with sensors and displays
+- **I2C STEMMA QT connector** for plug-and-play support for different controllers
 - **BLE-compatible microcontrollers**: Tested with nRF52840
-- **Optional OLED/TFT display** for live chord/layer feedback
 - **All components on a single PCB** – no diodes, no hand wiring, just plug and go
+- **Two PCB system** - one controller board and one keypad
+- **HW based key detection** - mcp23008, fast (400 kHz) for accurate chord detection
+- **1200mAh Battery** - hold keypad in place and reduces charge frequency
+
+---
+
+## CircuitPython Compatibility
+
+- **Tested with CircuitPython**: Version 9.2.8
+- Library installation process if MacOS is used (delete the ._ libs)
+
+```
+circup install adafruit_ble adafruit_bus_device adafruit_hid
+cd /Volumes/CIRCUITPY
+find . -type f -name '._*' -delete
+
+circup install adafruit_displayio_ssd1306 adafruit_display_text adafruit_ssd1306 adafruit_mcp230xx
+
+cd /Volumes/CIRCUITPY
+find . -type f -name '._*' -delete
+```
 
 ---
 
@@ -87,23 +100,6 @@ All hardware design files are open source and located in the `pcb/` and `cad/` d
 
 ---
 
-## CircuitPython Compatibility
-
-- **Tested with CircuitPython**: Version 9.2.8
-- Library installation process if MacOS is used (delete the ._ libs)
-
-```
-circup install adafruit_ble adafruit_bus_device adafruit_hid
-cd /Volumes/CIRCUITPY
-find . -type f -name '._*' -delete
-
-circup install adafruit_displayio_ssd1306 adafruit_display_text adafruit_ssd1306 adafruit_mcp230xx
-
-cd /Volumes/CIRCUITPY
-find . -type f -name '._*' -delete
-```
-
----
 
 ## Layer Maps
 
@@ -256,4 +252,38 @@ Each layer uses unique key combinations (chords) from the 5 keys (positions 0–
 | F10    |     |  X  |  X  |  X  |     | (0, 1, 2)    |
 | F11    |  X  |  X  |  X  |     |     | (1, 2, 3)    |
 | F12    |  X  |  X  |     |  X  |     | (0, 2, 3)    |
+
+---
+
+## Typing Speed
+
+Typing speed on the cinco is ~30 WPM. It is fast enough to not be frustrated. Slow enough to improve on.
+
+That is about the same as my typing speed:
+
+* thumb typing speed on my phone
+* one handed on a qwerty full size keyboard
+---
+
+## Bill of Materials
+
+cinco-cinco keypad
+
+| Designators | Qty | Value               | Footprint                 |
+|-------------|-----|---------------------|---------------------------|
+| R1–R4       | 4   | 10 kΩ               | SMD 0805 resistor         |
+| J1          | 1   | Conn_01x04_Socket   | JST-SH 4-pin connector    |
+| U1          | 1   | MCP23008-xSS        | SSOP-20 package           |
+| SW1–SW5     | 5   | SW_Push             | Kailh PG1350 switch socket|
+| JP1         | 1   | SolderJumper_2_Open | 2-pin solder jumper       |
+
+BLE Controller Breakout nRF52840 Nice Nano v2
+
+| Designators | Qty | Value                    | Footprint                 |
+|-------------|-----|--------------------------|---------------------------|
+| U1          | 1   | Nice! Nano (ProMicro)    | ProMicro module           |
+| J2          | 1   | Conn_01x04_Socket        | JST-SH 4-pin connector    |
+| J1          | 1   | Conn_01x02_Socket        | JST-PH 2-pin connector    |
+| SW1         | 1   | SW_SPST                  | SMD slide switch          |
+
 
