@@ -26,6 +26,7 @@ I have spent the last year building pocket keybaords. My [BUBBY](https://github.
 
 ---
 
+
 ## Why Chording?
 
 Computing is rapidly changing. We are moving away from sitting at desks and staring at screens. Smart glasses and watches let us consume information on the go. Phones, which have taken too much of our attention, no longer need to be our primary method of communication.
@@ -37,6 +38,8 @@ With Cinco-Cinco, we take advantage of our five fingers to create a new kind of 
 Chording opens up a future of input that is compact, discreet, and mobile. This same keyboard can also enhance desktop productivity, allowing CAD users and creatives to use one hand for keyboard shortcuts while the other handles precise mouse movements.
 
 ---
+
+![Screenshot](pics/cc-freecad.gif)
 
 ## Hardware Highlights
 
