@@ -1,9 +1,11 @@
 # Cinco-Cinco
-*A 5-Key Chording Keyboard with Layered Input and BLE Support*
+*A 5-Key Wireless Chording Keyboard*
 
-Cinco-Cinco is a wireless BLE, low-profile chording keyboard that uses just **five keys** to emulate a full keyboard. By combining keypresses into chords and utilizing **seven layers**, Cinco-Cinco enables efficient one-handed typing.  
+Cinco-Cinco is a low-profile chording keyboard that uses just **five keys** to emulate a full keyboard. By combining keypresses into chords and utilizing **seven layers**.
 
-I have spent the last year building pocket keybaords. My [BUBBY](https://github.com/mikeysklar/bubby) is a daily carry which I use for todos, lists and reminders. It made me enjoy typing with one hand to the point that I wanted a desktop version which has become the cinco-cinco. 
+I have spent the last year building pocket keybaords. My [BUBBY](https://github.com/mikeysklar/bubby) is a daily carry which I use for todo lists. It made me enjoy typing with one hand to the point that I wanted a desktop version which is what you see here.
+
+![Screenshot](pics/cc-main.jpeg)
 
 ## Table of Contents
 - [Why Chording?](#why-chording)
