@@ -1,13 +1,20 @@
-# Cinco-Cinco
+# Cinco-Cinco  
 *A 5-Key Wireless Chording Keyboard*
 
-Cinco-Cinco is a low-profile chording keyboard that uses just **five keys** to emulate a full keyboard. By combining keypresses into chords and utilizing **seven layers**.
+Cinco-Cinco is a low-profile chording keyboard that uses just **five
+keys** to emulate a full keyboard by combining keypresses into
+chords and utilizing **seven layers**.
 
-I have spent the last year building pocket keybaords. My [BUBBY](https://github.com/mikeysklar/bubby) is a daily carry which I use for todo lists. It made me enjoy typing with one hand to the point that I wanted a desktop version which is what you see here.
+I’ve spent the last year building pocket keyboards. My
+[BUBBY](https://github.com/mikeysklar/bubby) is a daily carry which
+I use for todo lists. It made me enjoy typing with one hand to the
+point that I wanted a desktop version, which is what you see here.
 
 ![Screenshot](pics/cc-main.jpeg)
 
 ## Table of Contents
+
+- [Introduction](#introduction)
 - [Why Chording?](#why-chording)
 - [Hardware Highlights](#hardware-highlights)
 - [CircuitPython Compatibility](#circuitpython-compatibility)
@@ -22,9 +29,23 @@ I have spent the last year building pocket keybaords. My [BUBBY](https://github.
   - [Layer 7: F1 - F12](#layer-7-F1---F12)
 - [Typing Speed](#typing-speed)
 - [BOM](#bill-of-materials)
-- [License](#license)
 
 ---
+
+## Introduction
+
+Computing is rapidly changing. We are moving away from sitting at desks and staring at screens. Smart glasses and watches let us consume information on the go. Phones, which have taken too much of our attention, no longer need to be our primary method of communication.
+
+**The keys are key**
+
+With Cinco-Cinco, we take advantage of our five fingers to create a new kind of keyboard — one that allows you to input text **without finger travel**, without looking, and in some cases **without even needing your hands**.
+
+Chording opens up a future of input that is compact, discreet, and mobile. This same keyboard can also enhance desktop productivity, allowing CAD users and creatives to use one hand for keyboard shortcuts while the other handles precise mouse movements.
+
+Cinco-Cinco uses just **five keys**, but can generate over 107 different key combos, including mouse actions. The thumb button switches between **seven layers**—alphabets, numbers, punctuation, and more. The layout is based on a modified SAIE, optimized so the most common letters require minimal finger effort.
+
+At first, I wasn’t sure cramming so much into the thumb key would work well. But with careful timing and logic in the firmware, it switches layers smoothly without getting in the way.
+
 
 
 ## Why Chording?
