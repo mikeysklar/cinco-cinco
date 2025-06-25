@@ -61,7 +61,8 @@ switches layers smoothly without getting in the way.
 
 ---
 
-![Screenshot](pics/cc-freecad.gif)
+![Screenshot](pics/cc-parts.gif)
+
 
 ## Hardware Highlights
 
@@ -70,6 +71,8 @@ switches layers smoothly without getting in the way.
 - **Hardware-based key detection**: MCP23008 GPIO expander running at 400 kHz for fast, accurate chord detection  
 - **BLE-compatible microcontrollers**: Tested with nRF52840  
 - **1200mAh battery** integrated into the case to hold keypad in place and reduce charging frequency  
+
+![Screenshot](pics/cc-freecad.gif)
 
 ### Case Design
 
