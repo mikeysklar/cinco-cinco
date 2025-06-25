@@ -15,10 +15,13 @@ point that I wanted a desktop version, which is what you see here.
 ## Table of Contents
 
 - [Introduction](#introduction)
-- [Why Chording?](#why-chording)
 - [Hardware Highlights](#hardware-highlights)
+  - [Case Design](#case-design)
+  - [Mechanical Switch Choice](#mechanical-switch-choice)
+  - [Chording Software](#chording-software)
 - [CircuitPython Compatibility](#circuitpython-compatibility)
 - [Design Files & Software Versions](#design-files--software-versions)
+- [Typing Speed](#typing-speed)
 - [Layer Maps](#layer-maps)
   - [Layer 1: Letters](#layer-1-letters)
   - [Layer 2: Numbers](#layer-2-numbers)
@@ -27,36 +30,34 @@ point that I wanted a desktop version, which is what you see here.
   - [Layer 5: Mouse Control / Media](#layer-5-mouse-control--media)
   - [Layer 6: Media](#layer-6-media)
   - [Layer 7: F1 - F12](#layer-7-F1---F12)
-- [Typing Speed](#typing-speed)
 - [BOM](#bill-of-materials)
 
 ---
 
 ## Introduction
 
-Computing is rapidly changing. We are moving away from sitting at desks and staring at screens. Smart glasses and watches let us consume information on the go. Phones, which have taken too much of our attention, no longer need to be our primary method of communication.
+Computing is rapidly changing. We are moving away from sitting at
+desks and staring at screens. Smart glasses and watches let us
+consume information on the go. Phones, which have taken too much
+of our attention, no longer need to be our primary method of
+communication.
 
 **The keys are key**
 
-With Cinco-Cinco, we take advantage of our five fingers to create a new kind of keyboard — one that allows you to input text **without finger travel**, without looking, and in some cases **without even needing your hands**.
+Chording opens up a future of input that is compact, discreet, and
+mobile. This same keyboard can also enhance desktop productivity,
+allowing CAD users and creatives to use one hand for keyboard
+shortcuts while the other handles precise mouse movements.
 
-Chording opens up a future of input that is compact, discreet, and mobile. This same keyboard can also enhance desktop productivity, allowing CAD users and creatives to use one hand for keyboard shortcuts while the other handles precise mouse movements.
+Cinco-Cinco uses just **five keys**, but can generate over 107
+different key combos, including mouse actions. The thumb button
+switches between **seven layers**—alphabets, numbers, punctuation,
+and more. The layout is based on a modified SAIE layout, optimized so 
+the most common letters require minimal finger effort.
 
-Cinco-Cinco uses just **five keys**, but can generate over 107 different key combos, including mouse actions. The thumb button switches between **seven layers**—alphabets, numbers, punctuation, and more. The layout is based on a modified SAIE, optimized so the most common letters require minimal finger effort.
-
-At first, I wasn’t sure cramming so much into the thumb key would work well. But with careful timing and logic in the firmware, it switches layers smoothly without getting in the way.
-
-
-
-## Why Chording?
-
-Computing is rapidly changing. We are moving away from sitting at desks and staring at screens. Smart glasses and watches let us consume information on the go. Phones, which have taken too much of our attention, no longer need to be our primary method of communication.
-
-**The keys are key**
-
-With Cinco-Cinco, we take advantage of our five fingers to create a new kind of keyboard — one that allows you to input text **without finger travel**, without looking, and in some cases **without even needing your hands**.
-
-Chording opens up a future of input that is compact, discreet, and mobile. This same keyboard can also enhance desktop productivity, allowing CAD users and creatives to use one hand for keyboard shortcuts while the other handles precise mouse movements.
+At first, I wasn’t sure cramming so much into the thumb key would
+work well. But with careful timing and logic in the firmware, it
+switches layers smoothly without getting in the way.
 
 ---
 
@@ -64,12 +65,39 @@ Chording opens up a future of input that is compact, discreet, and mobile. This 
 
 ## Hardware Highlights
 
-- **I2C STEMMA QT connector** for plug-and-play support for different controllers
-- **BLE-compatible microcontrollers**: Tested with nRF52840
-- **All components on a single PCB** – no diodes, no hand wiring, just plug and go
-- **Two PCB system** - one controller board and one keypad
-- **HW based key detection** - mcp23008, fast (400 kHz) for accurate chord detection
-- **1200mAh Battery** - hold keypad in place and reduces charge frequency
+- **I2C STEMMA QT connector** for plug-and-play support for different controllers  
+- **Two PCB system**: one controller board and one keypad connected via STEMMA QT cable  
+- **Hardware-based key detection**: MCP23008 GPIO expander running at 400 kHz for fast, accurate chord detection  
+- **BLE-compatible microcontrollers**: Tested with nRF52840  
+- **1200mAh battery** integrated into the case to hold keypad in place and reduce charging frequency  
+
+### Case Design
+
+The case is built as a three-layer sandwich. The base has cutouts
+to keep components low profile and includes heat-set inserts to
+secure the mid and top layers. The PCBs have matching holes for
+alignment and locking, ensuring a secure fit.
+
+Flat, countersunk screws keep the top flush. The “Human Machine”
+inlay was added late to break up the large pink area and has become
+a distinctive feature.
+
+### Mechanical Switch Choice
+
+I chose Kailh PG1350 CHOC switches for their availability and easy
+installation. Their low-profile design lets all components fit on
+the PCB’s bottom side, simplifying SMT assembly. I’ve tried pink,
+red, and robin egg blue switches—the blue ones feel best to type
+on, despite needing more force, and they look nice too.
+
+### Chording Software
+
+The firmware works hard to register chords accurately despite early
+challenges with false triggers and duplicates. It waits for the
+first key release before registering a chord, allowing for sloppy
+or staggered key presses without mistakes. It doesn’t wait for all
+keys to be released — once a key lifts, the chord buffer clears,
+letting you move on quickly.
 
 ---
 
@@ -123,6 +151,20 @@ find . -type f -name '._*' -delete
 
 
 All hardware design files are open source and located in the `pcb/` and `cad/` directories of this repository.
+
+---
+
+![Screenshot](pics/cc-monkey.png)
+
+## Typing Speed
+
+Typing speed on the cinco is ~25 WPM. It is fast enough to not be frustrated. Slow enough to improve on.
+
+That is about the same as my typing speed:
+
+* thumb typing speed on my phone
+* one handed on a qwerty full size keyboard
+
 
 ---
 
@@ -281,16 +323,6 @@ Each layer uses unique key combinations (chords) from the 5 keys (positions 0–
 
 ---
 
-## Typing Speed
-
-Typing speed on the cinco is ~30 WPM. It is fast enough to not be frustrated. Slow enough to improve on.
-
-That is about the same as my typing speed:
-
-* thumb typing speed on my phone
-* one handed on a qwerty full size keyboard
----
-
 ## Bill of Materials
 
 cinco-cinco keypad
@@ -307,7 +339,7 @@ BLE Controller Breakout nRF52840 Nice Nano v2
 
 | Designators | Qty | Value                    | Footprint                 |
 |-------------|-----|--------------------------|---------------------------|
-| U1          | 1   | Nice! Nano (ProMicro)    | ProMicro module           |
+| U1          | 1   | Nice!Nano v2             | SuperMini nRF52840        |
 | J2          | 1   | Conn_01x04_Socket        | JST-SH 4-pin connector    |
 | J1          | 1   | Conn_01x02_Socket        | JST-PH 2-pin connector    |
 | SW1         | 1   | SW_SPST                  | SMD slide switch          |
