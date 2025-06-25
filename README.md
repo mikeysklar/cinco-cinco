@@ -61,7 +61,7 @@ switches layers smoothly without getting in the way.
 
 ---
 
-![Screenshot](pics/cc-parts.gif)
+![Screenshot](pics/cc-parts.jpeg)
 
 
 ## Hardware Highlights
